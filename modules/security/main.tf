@@ -1,9 +1,3 @@
-locals {
-  tags = {
-    Project = var.project
-  }
-}
-
 # ALB Security Group
 resource "aws_security_group" "alb" {
   name        = "${var.name_prefix}AlbSecurityGroup"
@@ -24,9 +18,9 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.name_prefix}AlbSecurityGroup"
-  })
+  }
 }
 
 # EC2 Security Group
@@ -59,9 +53,9 @@ resource "aws_security_group" "ec2" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.name_prefix}Ec2SecurityGroup"
-  })
+  }
 }
 # RDS Security Group
 resource "aws_security_group" "rds" {
@@ -85,7 +79,7 @@ resource "aws_security_group" "rds" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge(local.tags, {
+  tags = {
     Name = "${var.name_prefix}RdsSecurityGroup"
-  })
+  }
 }
