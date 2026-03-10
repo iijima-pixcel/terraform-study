@@ -1,60 +1,80 @@
 variable "region" {
-  type    = string
-  default = "ap-northeast-1"
+  description = "AWS region for resource deployment"
+  type        = string
+  default     = "ap-northeast-1"
 }
 
 variable "project" {
-  type    = string
-  default = "AwsStudy"
+  description = "Project name used for common resource tags"
+  type        = string
+  default     = "AwsStudy"
+}
+
+variable "environment" {
+  description = "Deployment environment name such as dev, stg, or prod"
+  type        = string
+  default     = "dev"
 }
 
 variable "name_prefix" {
-  type    = string
-  default = "AwsStudy"
+  description = "Prefix used for resource naming"
+  type        = string
+  default     = "AwsStudy"
 }
 
 variable "vpc_cidr" {
-  type = string
+  description = "CIDR block for the VPC"
+  type        = string
 }
 
 variable "public_subnet_1a_cidr" {
-  type = string
+  description = "CIDR block for the public subnet in the first availability zone"
+  type        = string
 }
 
 variable "public_subnet_1c_cidr" {
-  type = string
+  description = "CIDR block for the public subnet in the second availability zone"
+  type        = string
 }
 
 variable "private_subnet_1a_cidr" {
-  type = string
+  description = "CIDR block for the private subnet in the first availability zone"
+  type        = string
 }
 
 variable "private_subnet_1c_cidr" {
-  type = string
+  description = "CIDR block for the private subnet in the second availability zone"
+  type        = string
 }
 
 variable "cidr_ip_from_internet" {
-  type = string
+  description = "CIDR block allowed to access the ALB from the internet"
+  type        = string
 }
 
 variable "ami" {
-  type = string
+  description = "AMI ID for the EC2 instance"
+  type        = string
 }
 
 variable "key_name" {
-  type = string
+  description = "EC2 key pair name for SSH access"
+  type        = string
 }
 
 variable "alarm_email" {
-  type = string
+  description = "Email address subscribed to SNS alarm notifications"
+  type        = string
 }
 
 variable "db_master_username" {
-  type    = string
-  default = "admin"
+  description = "Master username for the RDS instance"
+  type        = string
+  default     = "admin"
 }
 
 variable "rds_master_password_ssm_name" {
-  type    = string
-  default = "/rds/master/password"
+  description = "SSM Parameter Store name that stores the RDS master password"
+  type        = string
+  default     = "/rds/master/password"
 }

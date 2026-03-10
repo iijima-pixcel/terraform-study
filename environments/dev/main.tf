@@ -10,11 +10,18 @@ terraform {
 
 provider "aws" {
   region = var.region
+
+  default_tags {
+    tags = {
+      Project     = var.project
+      Environment = var.environment
+      ManagedBy   = "Terraform"
+    }
+  }
 }
 
 module "network" {
   source      = "../../modules/network"
-  project     = var.project
   name_prefix = var.name_prefix
   vpc_cidr    = var.vpc_cidr
 
@@ -26,7 +33,6 @@ module "network" {
 
 module "security" {
   source                = "../../modules/security"
-  project               = var.project
   name_prefix           = var.name_prefix
   vpc_id                = module.network.aws_study_vpc_id
   cidr_ip_from_internet = var.cidr_ip_from_internet
@@ -34,7 +40,6 @@ module "security" {
 
 module "app" {
   source      = "../../modules/app"
-  project     = var.project
   name_prefix = var.name_prefix
 
   ami         = var.ami
