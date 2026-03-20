@@ -60,6 +60,17 @@ output "has_ec2_ssh_rule" {
   ]) > 0
 }
 
+output "has_ec2_ssh_from_any" {
+  description = "Whether EC2 security group allows SSH (22) from 0.0.0.0/0"
+  value = length([
+    for rule in aws_security_group.ec2.ingress :
+    rule
+    if rule.from_port == 22 &&
+       rule.to_port == 22 &&
+       contains(rule.cidr_blocks, "0.0.0.0/0")
+  ]) > 0
+}
+
 output "has_rds_mysql_rule" {
   description = "Whether the RDS security group allows MySQL from EC2 on port 3306"
   value = length([
