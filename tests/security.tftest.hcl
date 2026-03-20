@@ -42,6 +42,11 @@ run "security_test" {
   }
 
   assert {
+    condition     = output.has_ec2_ssh_from_any == false
+    error_message = "EC2 の SSH が 0.0.0.0/0 に公開されています（危険）"
+  }
+
+  assert {
     condition     = output.has_rds_mysql_rule
     error_message = "RDS Security Group は EC2 からの MySQL(3306) を許可する必要があります。"
   }
