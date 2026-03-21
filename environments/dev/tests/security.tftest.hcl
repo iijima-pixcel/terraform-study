@@ -2,7 +2,7 @@ run "security_test" {
   command = plan
 
   module {
-    source = "../modules/security"
+    source = "../../modules/security"
   }
 
   variables {

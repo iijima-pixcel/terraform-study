@@ -2,30 +2,30 @@ run "app_test" {
   command = plan
 
   module {
-    source = "../modules/app"
+    source = "../../modules/app"
   }
 
   variables {
-    name_prefix                  = "AwsStudy"
-    vpc_id                       = "vpc-12345678"
-    public_subnet_1a_id          = "subnet-11111111"
-    public_subnet_1c_id          = "subnet-22222222"
-    private_subnet_1a_id         = "subnet-33333333"
-    private_subnet_1c_id         = "subnet-44444444"
+    name_prefix          = "AwsStudy"
+    vpc_id               = "vpc-12345678"
+    public_subnet_1a_id  = "subnet-11111111"
+    public_subnet_1c_id  = "subnet-22222222"
+    private_subnet_1a_id = "subnet-33333333"
+    private_subnet_1c_id = "subnet-44444444"
 
-    alb_security_group_id        = "sg-11111111"
-    ec2_security_group_id        = "sg-22222222"
-    rds_security_group_id        = "sg-33333333"
+    alb_security_group_id = "sg-11111111"
+    ec2_security_group_id = "sg-22222222"
+    rds_security_group_id = "sg-33333333"
 
-    ami                          = "ami-12345678"
-    key_name                     = "test-key"
+    ami      = "ami-12345678"
+    key_name = "test-key"
 
     rds_identifier               = "awsstudy-db"
     rds_db_name                  = "appdb"
     db_master_username           = "admin"
     rds_master_password_ssm_name = "/rds/master/password"
 
-    alarm_email                  = "test@example.com"
+    alarm_email = "test@example.com"
   }
 
   assert {
