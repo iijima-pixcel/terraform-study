@@ -16,27 +16,27 @@ run "network_test" {
 
   assert {
     condition     = output.vpc_cidr == "10.0.0.0/16"
-    error_message = "VPC の CIDR が仕様書どおりではありません。"
+    error_message = "VPC の CIDR が仕様どおりではありません。"
   }
 
   assert {
     condition     = output.public_subnet_1a_cidr == "10.0.1.0/24"
-    error_message = "Public Subnet 1a の CIDR が仕様書どおりではありません。"
+    error_message = "Public Subnet 1a の CIDR が仕様どおりではありません。"
   }
 
   assert {
     condition     = output.public_subnet_1c_cidr == "10.0.2.0/24"
-    error_message = "Public Subnet 1c の CIDR が仕様書どおりではありません。"
+    error_message = "Public Subnet 1c の CIDR が仕様どおりではありません。"
   }
 
   assert {
     condition     = output.private_subnet_1a_cidr == "10.0.11.0/24"
-    error_message = "Private Subnet 1a の CIDR が仕様書どおりではありません。"
+    error_message = "Private Subnet 1a の CIDR が仕様どおりではありません。"
   }
 
   assert {
     condition     = output.private_subnet_1c_cidr == "10.0.12.0/24"
-    error_message = "Private Subnet 1c の CIDR が仕様書どおりではありません。"
+    error_message = "Private Subnet 1c の CIDR が仕様どおりではありません。"
   }
 
   assert {
