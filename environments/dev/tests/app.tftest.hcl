@@ -1,3 +1,7 @@
+mock_provider "aws" {
+  override_during = plan
+}
+
 run "app_test" {
   command = plan
 

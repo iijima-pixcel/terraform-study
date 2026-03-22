@@ -1,3 +1,7 @@
+mock_provider "aws" {
+  override_during = plan
+}
+
 run "security_test" {
   command = plan
 
