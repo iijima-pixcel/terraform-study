@@ -35,4 +35,4 @@ jobs:
         run: terraform test
 
       - name: Terraform Plan
-        run: terraform plan -var-file=terraform.tfvars -input=false
+        run: terraform plan -input=false
