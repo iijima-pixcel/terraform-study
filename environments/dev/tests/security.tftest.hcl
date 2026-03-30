@@ -1,8 +1,12 @@
+mock_provider "aws" {
+  override_during = plan
+}
+
 run "security_test" {
   command = plan
 
   module {
-    source = "../modules/security"
+    source = "../../modules/security"
   }
 
   variables {
