@@ -13,6 +13,12 @@ jobs:
       run:
         working-directory: environments/dev
 
+    env:
+      TF_VAR_ami: ${{ secrets.AMI }}
+      TF_VAR_key_name: ${{ secrets.KEY_NAME }}
+      TF_VAR_alarm_email: ${{ secrets.ALARM_EMAIL }}
+      TF_VAR_cidr_ip_from_internet: ${{ secrets.CIDR_IP_FROM_INTERNET}}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
