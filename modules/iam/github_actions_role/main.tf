@@ -328,7 +328,10 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
       "sns:Subscribe",
       "sns:Unsubscribe",
       "sns:SetTopicAttributes",
-      "sns:GetTopicAttributes"
+      "sns:GetTopicAttributes",
+      "sns:TagResource",
+      "sns:UntagResource",
+      "sns:ListTagsForResource"
     ]
 
     resources = [
@@ -392,6 +395,7 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
       "elasticloadbalancing:DeregisterTargets",
       "elasticloadbalancing:RemoveTags",
       "elasticloadbalancing:ModifyTargetGroup",
+      "elasticloadbalancing:ModifyLoadBalancerAttributes",
       "elasticloadbalancing:ModifyTargetGroupAttributes"
     ]
 
@@ -445,6 +449,7 @@ resource "aws_iam_policy" "github_actions_terraform" {
 
   tags = {
     Name    = "${var.role_name}-policy"
+    Project     = var.project
   }
 }
 
