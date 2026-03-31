@@ -25,26 +25,31 @@ variable "name_prefix" {
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
+  default     = "10.10.0.0/16"
 }
 
 variable "public_subnet_1a_cidr" {
   description = "CIDR block for the public subnet in the first availability zone"
   type        = string
+  default     = "10.10.1.0/24"
 }
 
 variable "public_subnet_1c_cidr" {
   description = "CIDR block for the public subnet in the second availability zone"
   type        = string
+  default     = "10.10.2.0/24"
 }
 
 variable "private_subnet_1a_cidr" {
   description = "CIDR block for the private subnet in the first availability zone"
   type        = string
+  default     = "10.10.10.0/24"
 }
 
 variable "private_subnet_1c_cidr" {
   description = "CIDR block for the private subnet in the second availability zone"
   type        = string
+  default     = "10.10.20.0/24"
 }
 
 variable "cidr_ip_from_internet" {
