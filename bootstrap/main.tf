@@ -22,7 +22,7 @@ provider "aws" {
 }
 
 module "github_actions_role" {
-  source = "../../modules/iam/github_actions_role"
+  source = "../modules/iam/github_actions_role"
 
   project                      = var.project
   name_prefix                  = var.name_prefix
@@ -33,5 +33,6 @@ module "github_actions_role" {
   rds_master_password_ssm_name = var.rds_master_password_ssm_name
   ssm_kms_key_id               = var.ssm_kms_key_id
   github_oidc_thumbprints      = var.github_oidc_thumbprints
+  state_bucket_name            = var.state_bucket_name
+  lock_table_name              = var.lock_table_name
 }
-

@@ -1,6 +1,13 @@
 .terraform/
+**/.terraform/*
+
 *.tfstate
 *.tfstate.*
+
 crash.log
+
 *.tfvars
 *.tfvars.json
+
+bootstrap/providers/
+bootstrap/modules/
