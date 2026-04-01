@@ -47,3 +47,19 @@ variable "github_oidc_thumbprints" {
   description = "Thumbprints for the GitHub OIDC provider"
   type        = list(string)
 }
+
+variable "state_bucket_name" {
+  description = "S3 bucket name for Terraform state"
+  type        = string
+}
+
+variable "lock_table_name" {
+  description = "DynamoDB table name for Terraform state locking"
+  type        = string
+}
+
+variable "region" {
+  description = "AWS region for resource deployment"
+  type        = string
+  default     = "ap-northeast-1"
+}

@@ -20,7 +20,7 @@ resource "aws_iam_openid_connect_provider" "github" {
   thumbprint_list = var.github_oidc_thumbprints
 
   tags = {
-    Name    = "${var.name_prefix}-github-oidc"
+    Name = "${var.name_prefix}-github-oidc"
   }
 }
 
@@ -60,7 +60,7 @@ resource "aws_iam_role" "github_actions_terraform" {
   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
 
   tags = {
-    Name    = var.role_name
+    Name = var.role_name
   }
 }
 
@@ -85,7 +85,7 @@ resource "aws_iam_role" "ec2" {
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
 
   tags = {
-    Name    = "${var.name_prefix}-EC2-Role"
+    Name = "${var.name_prefix}-EC2-Role"
   }
 }
 
@@ -138,6 +138,51 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm_attach" {
 }
 
 data "aws_iam_policy_document" "github_actions_terraform_policy" {
+  statement {
+    sid    = "TerraformStateBucket"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.state_bucket_name}"
+    ]
+  }
+
+  statement {
+    sid    = "TerraformStateObject"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.state_bucket_name}/*"
+    ]
+  }
+
+  statement {
+    sid    = "TerraformStateLockTable"
+    effect = "Allow"
+
+    actions = [
+      "dynamodb:DescribeTable",
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:UpdateItem"
+    ]
+
+    resources = [
+      "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${var.lock_table_name}"
+    ]
+  }
+
   statement {
     sid    = "Ec2Describe"
     effect = "Allow"
