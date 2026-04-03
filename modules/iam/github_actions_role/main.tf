@@ -354,6 +354,9 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
       "cloudwatch:PutMetricAlarm",
       "cloudwatch:DeleteAlarms",
       "cloudwatch:DescribeAlarms",
+      "cloudwatch:ListTagsForResource",
+      "cloudwatch:TagResource",
+      "cloudwatch:UntagResource",
       "cloudwatch:EnableAlarmActions",
       "cloudwatch:DisableAlarmActions"
     ]
@@ -372,8 +375,14 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
       "sns:DeleteTopic",
       "sns:Subscribe",
       "sns:Unsubscribe",
+      "sns:GetSubscriptionAttributes",
+      "sns:SetSubscriptionAttributes",
+      "sns:GetSubscriptionAttributes",
       "sns:SetTopicAttributes",
-      "sns:GetTopicAttributes"
+      "sns:GetTopicAttributes",
+      "sns:TagResource",
+      "sns:UntagResource",
+      "sns:ListTagsForResource"
     ]
 
     resources = [
@@ -437,6 +446,7 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
       "elasticloadbalancing:DeregisterTargets",
       "elasticloadbalancing:RemoveTags",
       "elasticloadbalancing:ModifyTargetGroup",
+      "elasticloadbalancing:ModifyLoadBalancerAttributes",
       "elasticloadbalancing:ModifyTargetGroupAttributes"
     ]
 
@@ -490,6 +500,7 @@ resource "aws_iam_policy" "github_actions_terraform" {
 
   tags = {
     Name    = "${var.role_name}-policy"
+    Project     = var.project
   }
 }
 
