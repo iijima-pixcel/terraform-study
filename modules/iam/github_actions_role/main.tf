@@ -500,7 +500,6 @@ resource "aws_iam_policy" "github_actions_terraform" {
 
   tags = {
     Name    = "${var.role_name}-policy"
-    Project     = var.project
   }
 }
 
