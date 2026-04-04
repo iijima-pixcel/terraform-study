@@ -30,3 +30,17 @@ terraform apply
 ### 3. CI/CD
 1. GitHub ActionsにPRを出すと、CIが走り、`terraform plan`の結果が出ます。
 2. マージすると、CDが走り、AWSリソースが作成されます。
+
+## 補足（セキュリティ設定）
+GitHub Actions から AWS へアクセスするための IAM ロールについては、
+OIDC の信頼ポリシーにて以下のような条件でアクセスを制限しています。
+
+- 特定の GitHub リポジトリのみ許可
+- ブランチ（main）または pull_request のみ許可
+
+例：
+- token.actions.githubusercontent.com:sub に対して
+  repo:<organization>/<repository>:ref:refs/heads/main
+  repo:<organization>/<repository>:pull_request
+
+これにより、不要なリポジトリやブランチからのアクセスを防止しています。
