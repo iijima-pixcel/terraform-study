@@ -1,0 +1,7 @@
+app_repo_url: "https://github.com/koujienami/aws-study.git"
+app_repo_version: "main"
+app_base_dir: /opt
+app_dir_name: aws-study
+app_dir: "{{ app_base_dir }}/{{ app_dir_name }}"
+app_owner: ec2-user
+app_group: ec2-user

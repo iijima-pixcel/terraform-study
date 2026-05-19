@@ -1,0 +1,17 @@
+[Unit]
+Description=AWS Study Spring Boot Application
+After=network.target
+
+[Service]
+Type=simple
+User={{ app_owner }}
+Group={{ app_group }}
+WorkingDirectory={{ app_dir }}
+Environment="JAVA_HOME={{ java_home }}"
+ExecStart={{ java_bin }} -jar {{ deployed_jar_path }} --spring.config.location=file:{{ app_properties_path }}
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

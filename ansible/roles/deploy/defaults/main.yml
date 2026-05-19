@@ -1,0 +1,18 @@
+app_dir: /opt/aws-study
+app_owner: ec2-user
+app_group: ec2-user
+
+jar_output_dir: "{{ app_dir }}/build/libs"
+jar_pattern: "*SNAPSHOT.jar"
+deployed_jar_path: "{{ app_dir }}/app.jar"
+
+config_dir: "{{ app_dir }}/config"
+app_properties_path: "{{ config_dir }}/application.properties"
+
+systemd_unit_name: aws-study
+systemd_unit_path: "/etc/systemd/system/{{ systemd_unit_name }}.service"
+
+java_home: /usr/lib/jvm/java-21-amazon-corretto.x86_64
+java_bin: "{{ java_home }}/bin/java"
+
+server_port: 8080

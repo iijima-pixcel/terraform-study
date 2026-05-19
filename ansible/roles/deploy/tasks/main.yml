@@ -1,0 +1,100 @@
+- name: Find built jar files
+  ansible.builtin.find:
+    paths: "{{ jar_output_dir }}"
+    patterns: "{{ jar_pattern }}"
+    file_type: file
+  register: jar_files
+
+- name: Fail if no jar file was found
+  ansible.builtin.fail:
+    msg: "No jar file was found in {{ jar_output_dir }}"
+  when: jar_files.matched == 0
+
+- name: Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ config_dir }}"
+    state: directory
+    owner: "{{ app_owner }}"
+    group: "{{ app_group }}"
+    mode: "0755"
+
+- name: Copy built jar to fixed path
+  ansible.builtin.copy:
+    src: "{{ jar_files.files[0].path }}"
+    dest: "{{ deployed_jar_path }}"
+    remote_src: true
+    owner: "{{ app_owner }}"
+    group: "{{ app_group }}"
+    mode: "0755"
+
+- name: Get DB password from SSM Parameter Store
+  ansible.builtin.command:
+    cmd: >
+      aws ssm get-parameter
+      --name {{ ssm_db_password_name }}
+      --with-decryption
+      --query Parameter.Value
+      --output text
+      --region {{ aws_region }}
+  register: db_password_result
+  changed_when: false
+  no_log: true
+
+- name: Set DB password fact
+  ansible.builtin.set_fact:
+    db_password: "{{ db_password_result.stdout }}"
+  no_log: true
+
+- name: Create external application.properties
+  ansible.builtin.template:
+    src: application.properties.j2
+    dest: "{{ app_properties_path }}"
+    owner: "{{ app_owner }}"
+    group: "{{ app_group }}"
+    mode: "0600"
+
+- name: Create systemd unit file
+  ansible.builtin.template:
+    src: aws-study.service.j2
+    dest: "{{ systemd_unit_path }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: true
+
+- name: Enable and start application service
+  ansible.builtin.systemd:
+    name: "{{ systemd_unit_name }}"
+    enabled: true
+    state: restarted
+
+- name: Wait for application port
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ server_port }}"
+    timeout: 30
+
+- name: Check application health with curl
+  ansible.builtin.command:
+    cmd: "curl -I http://127.0.0.1:{{ server_port }}"
+  register: app_health_result
+  changed_when: false
+  failed_when: false
+
+- name: Show application health result
+  ansible.builtin.debug:
+    var: app_health_result.stdout_lines
+
+- name: Show service status
+  ansible.builtin.command:
+    cmd: "systemctl status {{ systemd_unit_name }} --no-pager"
+  register: systemd_status_result
+  changed_when: false
+  failed_when: false
+
+- name: Show service status output
+  ansible.builtin.debug:
+    var: systemd_status_result.stdout_lines

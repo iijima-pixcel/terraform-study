@@ -1,0 +1,5 @@
+- name: Clone application source
+  hosts: app
+  become: true
+  roles:
+    - app_source

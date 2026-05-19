@@ -1,0 +1,96 @@
+- name: Check application directory exists
+  ansible.builtin.stat:
+    path: "{{ app_dir }}"
+  register: app_dir_stat
+
+- name: Fail if application directory does not exist
+  ansible.builtin.fail:
+    msg: "Application directory was not found at {{ app_dir }}"
+  when: not app_dir_stat.stat.exists
+
+- name: Deploy build.gradle for jar packaging
+  ansible.builtin.template:
+    src: build.gradle.j2
+    dest: "{{ app_dir }}/build.gradle"
+    owner: "{{ app_owner }}"
+    group: "{{ app_group }}"
+    mode: "0644"
+
+- name: Ensure gradlew exists
+  ansible.builtin.stat:
+    path: "{{ gradle_wrapper_path }}"
+  register: gradlew_stat
+
+- name: Fail if gradlew does not exist
+  ansible.builtin.fail:
+    msg: "gradlew was not found at {{ gradle_wrapper_path }}"
+  when: not gradlew_stat.stat.exists
+
+- name: Make gradlew executable
+  ansible.builtin.file:
+    path: "{{ gradle_wrapper_path }}"
+    mode: "0755"
+
+- name: Check Java version
+  ansible.builtin.command: java -version
+  become_user: "{{ app_owner }}"
+  register: java_version_result
+  changed_when: false
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+
+- name: Show Java version
+  ansible.builtin.debug:
+    var: java_version_result.stderr_lines
+
+- name: Clean previous Gradle build
+  ansible.builtin.command: ./gradlew clean
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ app_owner }}"
+  register: gradle_clean_result
+  changed_when: true
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+
+- name: Show Gradle clean stdout
+  ansible.builtin.debug:
+    var: gradle_clean_result.stdout_lines
+
+- name: Show Gradle clean stderr
+  ansible.builtin.debug:
+    var: gradle_clean_result.stderr_lines
+
+- name: Run Gradle build without tests
+  ansible.builtin.command: ./gradlew build -x test --info
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ app_owner }}"
+  register: gradle_build_result
+  changed_when: true
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+
+- name: Show Gradle build stdout
+  ansible.builtin.debug:
+    var: gradle_build_result.stdout_lines
+
+- name: Show Gradle build stderr
+  ansible.builtin.debug:
+    var: gradle_build_result.stderr_lines
+
+- name: Find built jar files
+  ansible.builtin.find:
+    paths: "{{ jar_output_dir }}"
+    patterns: "{{ jar_pattern }}"
+    file_type: file
+  register: jar_files
+
+- name: Fail if no jar file was created
+  ansible.builtin.fail:
+    msg: "No jar file was found in {{ jar_output_dir }}"
+  when: jar_files.matched == 0
+
+- name: Show built jar files
+  ansible.builtin.debug:
+    var: jar_files.files

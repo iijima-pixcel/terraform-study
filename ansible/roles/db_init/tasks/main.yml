@@ -1,0 +1,68 @@
+- name: Install python3-pip
+  ansible.builtin.dnf:
+    name: python3-pip
+    state: present
+    update_cache: true
+  become: true
+
+- name: Install PyMySQL
+  ansible.builtin.pip:
+    name: PyMySQL
+    executable: pip3
+
+- name: Get DB password from SSM Parameter Store
+  ansible.builtin.command:
+    cmd: >
+      aws ssm get-parameter
+      --name {{ ssm_db_password_name }}
+      --with-decryption
+      --query Parameter.Value
+      --output text
+      --region {{ aws_region }}
+  register: db_password_result
+  changed_when: false
+  no_log: true
+
+- name: Set DB password fact
+  ansible.builtin.set_fact:
+    db_password: "{{ db_password_result.stdout }}"
+  no_log: true
+
+- name: Ensure database exists
+  community.mysql.mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_host: "{{ rds_endpoint }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    login_port: 3306
+  no_log: true
+
+- name: Create student table
+  community.mysql.mysql_query:
+    login_host: "{{ rds_endpoint }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    login_port: 3306
+    query: |
+      CREATE TABLE IF NOT EXISTS student (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        name VARCHAR(255) NOT NULL
+      );
+  no_log: true
+
+- name: Insert initial student row
+  community.mysql.mysql_query:
+    login_host: "{{ rds_endpoint }}"
+    login_user: "{{ db_user }}"
+    login_password: "{{ db_password }}"
+    login_db: "{{ db_name }}"
+    login_port: 3306
+    query: |
+      INSERT INTO student (name)
+      SELECT '{{ student_seed_name }}'
+      WHERE NOT EXISTS (
+        SELECT 1 FROM student WHERE name = '{{ student_seed_name }}'
+      );
+  no_log: true

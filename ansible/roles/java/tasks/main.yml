@@ -1,0 +1,34 @@
+- name: Install Java and git on Amazon Linux 2023
+  ansible.builtin.dnf:
+    name: 
+      -  "{{ java_package_name }}"
+      - "{{ git_package_name }}"
+    state: present
+
+- name: Verify java command exists
+  ansible.builtin.command: java -version
+  register: java_version_result
+  changed_when: false
+
+- name: Show java version
+  ansible.builtin.debug:
+    var: java_version_result.stderr_lines
+
+- name: Verify git command exists
+  ansible.builtin.command: git --version
+  register: git_version_result
+  changed_when: false
+
+- name: Show git version
+  ansible.builtin.debug:
+    var: git_version_result.stdout_lines
+
+- name: Create profile file for JAVA_HOME
+  ansible.builtin.copy:
+    dest: /etc/profile.d/java.sh
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      export JAVA_HOME={{ java_home }}
+      export PATH=$JAVA_HOME/bin:$PATH

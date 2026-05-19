@@ -57,7 +57,8 @@ resource "aws_instance" "app" {
   subnet_id                   = var.public_subnet_1a_id
   vpc_security_group_ids      = [var.ec2_security_group_id]
   associate_public_ip_address = true
-
+  iam_instance_profile        = var.iam_instance_profile_name
+  
   tags = {
     Name = "${var.name_prefix}EC2"
   }

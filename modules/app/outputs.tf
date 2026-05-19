@@ -93,6 +93,11 @@ output "ec2_has_public_ip" {
   value       = aws_instance.app.associate_public_ip_address
 }
 
+output "ec2_public_ip" {
+  description = "EC2 public IP for SSH / direct access"
+  value       = aws_instance.app.public_ip
+}
+
 output "rds_instance_class" {
   description = "Instance class of the RDS instance"
   value       = aws_db_instance.this.instance_class
@@ -131,4 +136,24 @@ output "alb_5xx_metric_name" {
 output "rds_low_storage_metric_name" {
   description = "Metric name of the RDS low storage alarm"
   value       = aws_cloudwatch_metric_alarm.rds_low_storage.metric_name
+}
+
+output "rds_db_name" {
+  description = "Database name of the RDS instance"
+  value       = aws_db_instance.this.db_name
+}
+
+output "rds_username" {
+  description = "Master username of the RDS instance"
+  value       = aws_db_instance.this.username
+}
+
+output "alb_arn" {
+  description = "ARN of the Application Load Balancer"
+  value       = aws_lb.this.arn
+}
+
+output "target_group_arn" {
+  description = "ARN of the target group"
+  value       = aws_lb_target_group.this.arn
 }

@@ -63,3 +63,13 @@ variable "region" {
   type        = string
   default     = "ap-northeast-1"
 }
+
+variable "ec2_role_arn" {
+  description = "ARN of the EC2 IAM role that can be passed to EC2"
+  type        = string
+}
+
+variable "ansible_artifacts_bucket_name" {
+  description = "S3 bucket name for Ansible artifacts"
+  type        = string
+}

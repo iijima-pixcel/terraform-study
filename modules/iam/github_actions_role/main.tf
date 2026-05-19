@@ -64,79 +64,6 @@ resource "aws_iam_role" "github_actions_terraform" {
   }
 }
 
-data "aws_iam_policy_document" "ec2_assume_role" {
-  statement {
-    sid    = "Ec2AssumeRole"
-    effect = "Allow"
-
-    actions = [
-      "sts:AssumeRole"
-    ]
-
-    principals {
-      type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_role" "ec2" {
-  name               = "${var.name_prefix}-EC2-Role"
-  assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
-
-  tags = {
-    Name = "${var.name_prefix}-EC2-Role"
-  }
-}
-
-resource "aws_iam_instance_profile" "ec2" {
-  name = "${var.name_prefix}-ec2-instance-profile"
-  role = aws_iam_role.ec2.name
-}
-
-data "aws_iam_policy_document" "ec2_ssm_policy" {
-  statement {
-    sid    = "ReadSsmParameter"
-    effect = "Allow"
-
-    actions = [
-      "ssm:GetParameter",
-      "ssm:GetParameters"
-    ]
-
-    resources = [local.ssm_db_password_arn]
-  }
-
-  statement {
-    sid    = "DecryptViaSsm"
-    effect = "Allow"
-
-    actions = [
-      "kms:Decrypt"
-    ]
-
-    resources = [
-      data.aws_kms_key.ssm.arn
-    ]
-
-    condition {
-      test     = "StringEquals"
-      variable = "kms:ViaService"
-      values   = ["ssm.${data.aws_region.current.id}.amazonaws.com"]
-    }
-  }
-}
-
-resource "aws_iam_policy" "ec2_ssm_policy" {
-  name   = "${var.name_prefix}-ec2-ssm-policy"
-  policy = data.aws_iam_policy_document.ec2_ssm_policy.json
-}
-
-resource "aws_iam_role_policy_attachment" "ec2_ssm_attach" {
-  role       = aws_iam_role.ec2.name
-  policy_arn = aws_iam_policy.ec2_ssm_policy.arn
-}
-
 data "aws_iam_policy_document" "github_actions_terraform_policy" {
   statement {
     sid    = "TerraformStateBucket"
@@ -377,7 +304,6 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
       "sns:Unsubscribe",
       "sns:GetSubscriptionAttributes",
       "sns:SetSubscriptionAttributes",
-      "sns:GetSubscriptionAttributes",
       "sns:SetTopicAttributes",
       "sns:GetTopicAttributes",
       "sns:TagResource",
@@ -398,7 +324,7 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
       "iam:PassRole"
     ]
 
-    resources = [aws_iam_role.ec2.arn]
+    resources = [var.ec2_role_arn]
   }
 
   statement {
@@ -488,6 +414,67 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
     condition {
       test     = "StringEquals"
       variable = "rds:db-tag/Project"
+      values   = [var.project]
+    }
+  }
+
+  statement {
+    sid    = "ListAnsibleArtifactsBucket"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.ansible_artifacts_bucket_name}"
+    ]
+  }
+
+  statement {
+    sid    = "UploadAnsibleArtifactsToS3"
+    effect = "Allow"
+
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject"
+    ]
+
+    resources = [
+      "arn:aws:s3:::${var.ansible_artifacts_bucket_name}/*"
+    ]
+  }
+
+  statement {
+    sid    = "ReadSsmCommandResult"
+    effect = "Allow"
+
+    actions = [
+      "ssm:GetCommandInvocation",
+      "ssm:ListCommandInvocations",
+      "ssm:ListCommands"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "RunCommandToEc2ViaSsm"
+    effect = "Allow"
+
+    actions = [
+      "ssm:SendCommand"
+    ]
+
+    resources = [
+      "arn:aws:ssm:${data.aws_region.current.region}::document/AWS-RunShellScript",
+      "arn:aws:ec2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:instance/*"
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "ssm:resourceTag/Project"
       values   = [var.project]
     }
   }

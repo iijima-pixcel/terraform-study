@@ -1,0 +1,5 @@
+db_name: "awsstudy"
+db_username: "admin"
+aws_region: "ap-northeast-1"
+ssm_db_password_name: "/rds/master/password"
+server_port: 8080

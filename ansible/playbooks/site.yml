@@ -1,0 +1,11 @@
+- name: Setup and deploy Spring Boot application
+  hosts: localhost
+  connection: local
+  become: true
+
+  roles:
+    - java
+    - app_source
+    - build
+    - db_init
+    - deploy

@@ -20,6 +20,10 @@ provider "aws" {
   }
 }
 
+data "aws_iam_instance_profile" "ec2" {
+  name = "${var.name_prefix}-EC2-Instance-Profile"
+}
+
 module "network" {
   source      = "../../modules/network"
   name_prefix = var.name_prefix
@@ -46,6 +50,8 @@ module "app" {
   key_name    = var.key_name
   alarm_email = var.alarm_email
 
+  iam_instance_profile_name = data.aws_iam_instance_profile.ec2.name
+
   db_master_username           = var.db_master_username
   rds_master_password_ssm_name = var.rds_master_password_ssm_name
 
@@ -59,3 +65,4 @@ module "app" {
   ec2_security_group_id = module.security.ec2_security_group_id
   rds_security_group_id = module.security.rds_security_group_id
 }
+
