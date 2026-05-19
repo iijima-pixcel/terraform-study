@@ -24,6 +24,7 @@ run "app_test" {
     ami      = "ami-12345678"
     key_name = "test-key"
 
+    iam_instance_profile_name    = "dummy-profile"
     rds_identifier               = "awsstudy-db"
     rds_db_name                  = "appdb"
     db_master_username           = "admin"
