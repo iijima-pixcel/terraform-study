@@ -186,6 +186,7 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
 
     actions = [
       "iam:GetRole",
+      "iam:GetInstanceProfile",
       "iam:ListRolePolicies",
       "iam:ListAttachedRolePolicies"
     ]
