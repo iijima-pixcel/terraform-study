@@ -461,7 +461,7 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
   }
 
   statement {
-    sid    = "RunCommandToEc2ViaSsm"
+    sid    = "AllowRunShellScriptDocument"
     effect = "Allow"
 
     actions = [
@@ -469,7 +469,19 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
     ]
 
     resources = [
-      "arn:aws:ssm:${data.aws_region.current.region}::document/AWS-RunShellScript",
+      "arn:aws:ssm:${data.aws_region.current.id}::document/AWS-RunShellScript"
+    ]
+  }
+
+  statement {
+    sid    = "AllowSendCommandToTaggedEc2"
+    effect = "Allow"
+
+    actions = [
+      "ssm:SendCommand"
+    ]
+
+    resources = [
       "arn:aws:ec2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:instance/*"
     ]
 
