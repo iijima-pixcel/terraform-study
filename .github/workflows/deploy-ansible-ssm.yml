@@ -1,0 +1,76 @@
+name: Deploy Ansible with SSM
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-ansible:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ap-northeast-1
+      ANSIBLE_ARTIFACTS_BUCKET: ${{ secrets.ANSIBLE_ARTIFACTS_BUCKET }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::205619292566:role/GithubActionsTerraformRole
+          aws-region: ap-northeast-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.14.8
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        working-directory: environments/dev
+        run: terraform init -input=false
+
+      - name: Get Terraform outputs
+        working-directory: environments/dev
+        run: |
+          echo "EC2_INSTANCE_ID=$(terraform output -raw ec2_instance_id)" >> $GITHUB_ENV
+          echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
+
+      - name: Zip Ansible code
+        run: |
+          zip -r ansible.zip ansible
+
+      - name: Upload Ansible code to S3
+        run: |
+          aws s3 cp ansible.zip s3://${ANSIBLE_ARTIFACTS_BUCKET}/ansible/ansible.zip
+
+      - name: Run Ansible on EC2 via SSM
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --instance-ids "${EC2_INSTANCE_ID}" \
+            --comment "Run Ansible deploy" \
+            --parameters 'commands=[
+              "set -e",
+              "sudo dnf install -y unzip ansible-core",
+              "aws s3 cp s3://'${ANSIBLE_ARTIFACTS_BUCKET}'/ansible/ansible.zip /tmp/ansible.zip",
+              "rm -rf /tmp/ansible",
+              "unzip -o /tmp/ansible.zip -d /tmp",
+              "cd /tmp/ansible/ansible",
+              "ansible-playbook playbooks/site.yml -e rds_endpoint='${RDS_ENDPOINT}'"
+            ]' \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "COMMAND_ID=${COMMAND_ID}"
+
+          sleep 10
+
+          aws ssm get-command-invocation \
+            --command-id "${COMMAND_ID}" \
+            --instance-id "${EC2_INSTANCE_ID}"

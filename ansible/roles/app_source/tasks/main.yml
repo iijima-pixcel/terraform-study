@@ -1,0 +1,29 @@
+- name: Create application base directory
+  ansible.builtin.file:
+    path: "{{ app_base_dir }}"
+    state: directory
+    owner: "{{ app_owner }}"
+    group: "{{ app_group }}"
+    mode: "0755"
+
+- name: Clone application repository
+  ansible.builtin.git:
+    repo: "{{ app_repo_url }}"
+    dest: "{{ app_dir }}"
+    version: "{{ app_repo_version }}"
+    update: true
+  become_user: "{{ app_owner }}"
+  register: git_clone_result
+
+- name: Show git clone result
+  ansible.builtin.debug:
+    var: git_clone_result.after
+
+- name: Check gradlew exists
+  ansible.builtin.stat:
+    path: "{{ app_dir }}/gradlew"
+  register: gradlew_stat
+
+- name: Show gradlew check result
+  ansible.builtin.debug:
+    msg: "gradlew exists: {{ gradlew_stat.stat.exists }}"

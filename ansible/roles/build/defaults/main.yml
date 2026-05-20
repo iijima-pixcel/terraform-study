@@ -1,0 +1,16 @@
+app_dir: /opt/aws-study
+app_owner: ec2-user
+app_group: ec2-user
+
+gradle_wrapper_path: "{{ app_dir }}/gradlew"
+jar_output_dir: "{{ app_dir }}/build/libs"
+jar_pattern: "*.jar"
+
+spring_boot_version: "3.4.1"
+dependency_management_version: "1.1.7"
+app_group_id: "com.example"
+app_version: "0.0.1-SNAPSHOT"
+java_version: 21
+mybatis_version: "3.0.3"
+
+java_home: /usr/lib/jvm/java-21-amazon-corretto.x86_64

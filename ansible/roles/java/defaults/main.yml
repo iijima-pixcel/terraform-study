@@ -1,0 +1,3 @@
+java_package_name: java-21-amazon-corretto-devel
+git_package_name: git
+java_home: /usr/lib/jvm/java-21-amazon-corretto

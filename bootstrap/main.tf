@@ -21,6 +21,14 @@ provider "aws" {
   }
 }
 
+data "aws_ssm_parameter" "rds_master_password" {
+  name = var.rds_master_password_ssm_name
+}
+
+data "aws_kms_key" "ssm" {
+  key_id = var.ssm_kms_key_id
+}
+
 module "github_actions_role" {
   source = "../modules/iam/github_actions_role"
 
@@ -35,4 +43,21 @@ module "github_actions_role" {
   github_oidc_thumbprints      = var.github_oidc_thumbprints
   state_bucket_name            = var.state_bucket_name
   lock_table_name              = var.lock_table_name
+  ec2_role_arn                 = module.ec2_app_role.ec2_role_arn
+  ansible_artifacts_bucket_name = var.ansible_artifacts_bucket_name
+}
+
+module "ec2_app_role" {
+  source = "../modules/iam/ec2_app_role"
+
+  name_prefix         = var.name_prefix
+  ssm_db_password_arn = data.aws_ssm_parameter.rds_master_password.arn
+  ssm_kms_key_arn     = data.aws_kms_key.ssm.arn
+  ansible_artifacts_bucket_name = var.ansible_artifacts_bucket_name
+}
+
+module "ansible_artifacts_s3" {
+  source = "../modules/s3_artifacts"
+
+  ansible_artifacts_bucket_name = var.ansible_artifacts_bucket_name
 }

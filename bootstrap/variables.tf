@@ -69,3 +69,8 @@ variable "lock_table_name" {
   description = "DynamoDB table name for Terraform state locking"
   type        = string
 }
+
+variable "ansible_artifacts_bucket_name" {
+  description = "Ansible artifacts bucket name for s3"
+  type        = string
+}

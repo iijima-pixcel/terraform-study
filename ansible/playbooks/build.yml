@@ -1,0 +1,5 @@
+- name: Build Jar Files
+  hosts: app
+  become: true
+  roles:
+    - build
