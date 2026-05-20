@@ -61,7 +61,7 @@ jobs:
               "aws s3 cp s3://'${ANSIBLE_ARTIFACTS_BUCKET}'/ansible/ansible.zip /tmp/ansible.zip",
               "rm -rf /tmp/ansible",
               "unzip -o /tmp/ansible.zip -d /tmp",
-              "cd /tmp/ansible/ansible",
+              "cd /tmp/ansible",
               "ansible-playbook playbooks/site.yml -e rds_endpoint='${RDS_ENDPOINT}'"
             ]' \
             --query "Command.CommandId" \
