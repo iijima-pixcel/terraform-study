@@ -97,9 +97,7 @@ resource "aws_db_instance" "this" {
   publicly_accessible     = false
   multi_az                = false
   skip_final_snapshot     = false
-  final_snapshot_identifier = lower(
-    "${var.rds_identifier}-final-${formatdate("YYYYMMDDhhmmss", timestamp())}"
-  )
+  final_snapshot_identifier = "${lower(var.name_prefix)}-db-final-snapshot"
 
   tags = {
     Name = "${var.name_prefix}RDS"
