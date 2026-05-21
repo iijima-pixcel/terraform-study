@@ -65,6 +65,8 @@ jobs:
               "ansible-galaxy collection install community.mysql",
               "ansible-playbook -i inventory.ini playbooks/site.yml -e rds_endpoint='${RDS_ENDPOINT}'"
             ]' \
+            --cloud-watch-output-config \
+            CloudWatchOutputEnabled=true,CloudWatchLogGroupName=SSMRunCommandLogs \
             --query "Command.CommandId" \
             --output text)
 

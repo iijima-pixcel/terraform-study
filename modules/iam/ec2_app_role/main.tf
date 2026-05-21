@@ -1,4 +1,5 @@
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 
 data "aws_iam_policy_document" "ec2_assume_role" {
   statement {
@@ -83,6 +84,31 @@ data "aws_iam_policy_document" "ec2_policy" {
       variable = "kms:ViaService"
       values   = ["ssm.${data.aws_region.current.region}.amazonaws.com"]
     }
+  }
+
+  statement {
+    sid    = "CreateCloudWatchLogGroupForSsm"
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "WriteSsmLogsToSpecificLogGroup"
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+
+    resources = [
+      "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:SSMRunCommandLogs:*"
+    ]
   }
 }
 
