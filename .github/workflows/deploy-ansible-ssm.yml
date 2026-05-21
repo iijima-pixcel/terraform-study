@@ -62,7 +62,8 @@ jobs:
               "rm -rf /tmp/ansible",
               "unzip -o /tmp/ansible.zip -d /tmp",
               "cd /tmp/ansible",
-              "ansible-playbook playbooks/site.yml -e rds_endpoint='${RDS_ENDPOINT}'"
+              "ansible-galaxy collection install community.mysql",
+              "ansible-playbook -i inventory.ini playbooks/site.yml -e rds_endpoint='${RDS_ENDPOINT}'"
             ]' \
             --query "Command.CommandId" \
             --output text)
