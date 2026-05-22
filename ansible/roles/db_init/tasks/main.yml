@@ -33,15 +33,15 @@
     name: "{{ db_name }}"
     state: present
     login_host: "{{ rds_endpoint }}"
-    login_user: "{{ db_user }}"
+    login_user: "{{ db_username }}"
     login_password: "{{ db_password }}"
     login_port: 3306
- # no_log: true
+  no_log: true
 
 - name: Create student table
   community.mysql.mysql_query:
     login_host: "{{ rds_endpoint }}"
-    login_user: "{{ db_user }}"
+    login_user: "{{ db_username }}"
     login_password: "{{ db_password }}"
     login_db: "{{ db_name }}"
     login_port: 3306
@@ -55,7 +55,7 @@
 - name: Insert initial student row
   community.mysql.mysql_query:
     login_host: "{{ rds_endpoint }}"
-    login_user: "{{ db_user }}"
+    login_user: "{{ db_username }}"
     login_password: "{{ db_password }}"
     login_db: "{{ db_name }}"
     login_port: 3306
