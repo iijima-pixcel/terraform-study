@@ -12,6 +12,7 @@
     dest: "{{ app_dir }}"
     version: "{{ app_repo_version }}"
     update: true
+    force: yes
   become_user: "{{ app_owner }}"
   register: git_clone_result
 
