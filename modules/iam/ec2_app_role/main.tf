@@ -100,6 +100,17 @@ data "aws_iam_policy_document" "ec2_policy" {
       "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:SSMRunCommandLogs:*"
     ]
   }
+
+  statement {
+    sid    = "DescribeSsmLogGroups"
+    effect = "Allow"
+
+    actions = [
+      "logs:DescribeLogGroups"
+    ]
+
+    resources = ["*"]
+  }
 }
 
 resource "aws_iam_policy" "ec2_policy" {
