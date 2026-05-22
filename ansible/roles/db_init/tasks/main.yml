@@ -26,7 +26,7 @@
 - name: Set DB password fact
   ansible.builtin.set_fact:
     db_password: "{{ db_password_result.stdout }}"
- # no_log: true
+  no_log: true
 
 - name: Ensure database exists
   community.mysql.mysql_db:
@@ -36,7 +36,7 @@
     login_user: "{{ db_user }}"
     login_password: "{{ db_password }}"
     login_port: 3306
-  no_log: true
+ # no_log: true
 
 - name: Create student table
   community.mysql.mysql_query:
