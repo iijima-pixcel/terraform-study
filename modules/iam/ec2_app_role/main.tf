@@ -87,22 +87,12 @@ data "aws_iam_policy_document" "ec2_policy" {
   }
 
   statement {
-    sid    = "CreateCloudWatchLogGroupForSsm"
-    effect = "Allow"
-
-    actions = [
-      "logs:CreateLogGroup"
-    ]
-
-    resources = ["*"]
-  }
-
-  statement {
     sid    = "WriteSsmLogsToSpecificLogGroup"
     effect = "Allow"
 
     actions = [
       "logs:CreateLogStream",
+      "logs:DescribeLogStreams",
       "logs:PutLogEvents"
     ]
 

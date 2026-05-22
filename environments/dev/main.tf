@@ -66,3 +66,11 @@ module "app" {
   rds_security_group_id = module.security.rds_security_group_id
 }
 
+resource "aws_cloudwatch_log_group" "ssm_run_command" {
+  name              = "SSMRunCommandLogs"
+  retention_in_days = 14
+
+  tags = {
+    Name = "SSMRunCommandLogs"
+  }
+}
