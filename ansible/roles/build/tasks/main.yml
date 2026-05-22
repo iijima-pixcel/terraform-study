@@ -43,8 +43,18 @@
   ansible.builtin.debug:
     var: java_version_result.stderr_lines
 
+- name: Stop Gradle daemon
+  ansible.builtin.command: ./gradlew --stop
+  args:
+    chdir: "{{ app_dir }}"
+  become_user: "{{ app_owner }}"
+  changed_when: false
+  failed_when: false
+  environment:
+    JAVA_HOME: "{{ java_home }}"
+
 - name: Clean previous Gradle build
-  ansible.builtin.command: ./gradlew clean
+  ansible.builtin.command: ./gradlew clean --no-daemon
   args:
     chdir: "{{ app_dir }}"
   become_user: "{{ app_owner }}"
@@ -62,7 +72,7 @@
     var: gradle_clean_result.stderr_lines
 
 - name: Run Gradle build without tests
-  ansible.builtin.command: ./gradlew build -x test --info
+  ansible.builtin.command: ./gradlew build -x test --no-daemon --info
   args:
     chdir: "{{ app_dir }}"
   become_user: "{{ app_owner }}"
