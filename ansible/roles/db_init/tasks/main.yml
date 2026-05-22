@@ -26,7 +26,7 @@
 - name: Set DB password fact
   ansible.builtin.set_fact:
     db_password: "{{ db_password_result.stdout }}"
-  no_log: true
+ # no_log: true
 
 - name: Ensure database exists
   community.mysql.mysql_db:
