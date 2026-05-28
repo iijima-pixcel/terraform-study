@@ -98,7 +98,7 @@ resource "aws_db_instance" "this" {
   multi_az                = false
   skip_final_snapshot     = false
   final_snapshot_identifier = "${lower(var.name_prefix)}-db-final-snapshot"
-
+  
   tags = {
     Name = "${var.name_prefix}RDS"
   }
