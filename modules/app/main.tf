@@ -49,6 +49,48 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+resource "aws_wafv2_web_acl" "this" {
+  name  = "${var.name_prefix}-waf"
+  scope = "REGIONAL"
+
+  default_action {
+    allow {}
+  }
+
+  rule {
+    name     = "AWSManagedRulesCommonRuleSet"
+    priority = 1
+
+    override_action {
+      none {}
+    }
+
+    statement {
+      managed_rule_group_statement {
+        name        = "AWSManagedRulesCommonRuleSet"
+        vendor_name = "AWS"
+      }
+    }
+
+    visibility_config {
+      cloudwatch_metrics_enabled = true
+      metric_name                = "${var.name_prefix}-common-rule"
+      sampled_requests_enabled   = true
+    }
+  }
+
+  visibility_config {
+    cloudwatch_metrics_enabled = true
+    metric_name                = "${var.name_prefix}-waf"
+    sampled_requests_enabled   = true
+  }
+}
+
+resource "aws_wafv2_web_acl_association" "alb" {
+  resource_arn = aws_lb.this.arn
+  web_acl_arn  = aws_wafv2_web_acl.this.arn
+}
+
 # EC2
 resource "aws_instance" "app" {
   ami                         = var.ami
@@ -96,9 +138,9 @@ resource "aws_db_instance" "this" {
   backup_retention_period = 7
   publicly_accessible     = false
   multi_az                = false
-  skip_final_snapshot     = false
+  skip_final_snapshot     = true
   final_snapshot_identifier = "${lower(var.name_prefix)}-db-final-snapshot"
-
+  
   tags = {
     Name = "${var.name_prefix}RDS"
   }
