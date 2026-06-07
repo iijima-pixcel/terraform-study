@@ -1,14 +1,19 @@
 name: Deploy Ansible with SSM
 
 on:
-  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Terraform CD
+    types:
+      - completed
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  deploy-ansible:
+  ansible-ssm-deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     env:
