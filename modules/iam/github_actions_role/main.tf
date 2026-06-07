@@ -491,6 +491,22 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
       values   = [var.project]
     }
   }
+
+  statement {
+    sid    = "ManageSsmRunCommandLogGroup"
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:DeleteLogGroup",
+      "logs:PutRetentionPolicy",
+      "logs:*Tag*"
+    ]
+
+    resources = [
+      "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:SSMRunCommandLogs"
+    ]
+  }
 }
 
 resource "aws_iam_policy" "github_actions_terraform" {
@@ -506,4 +522,65 @@ resource "aws_iam_policy" "github_actions_terraform" {
 resource "aws_iam_role_policy_attachment" "github_actions_terraform" {
   role       = aws_iam_role.github_actions_terraform.name
   policy_arn = aws_iam_policy.github_actions_terraform.arn
+}
+
+data "aws_iam_policy_document" "github_actions_waf_policy" {
+  statement {
+    sid    = "CreateWafWebAcl"
+    effect = "Allow"
+
+    actions = [
+      "wafv2:CreateWebACL",
+      "wafv2:ListWebACLs"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ManageNamedWafWebAcl"
+    effect = "Allow"
+
+    actions = [
+      "wafv2:GetWebACL",
+      "wafv2:UpdateWebACL",
+      "wafv2:DeleteWebACL",
+      "wafv2:TagResource",
+      "wafv2:UntagResource",
+      "wafv2:ListTagsForResource"
+    ]
+
+    resources = [
+      "arn:aws:wafv2:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:regional/webacl/${var.name_prefix}-waf/*"
+    ]
+  }
+
+  statement {
+    sid    = "AssociateWafToAlb"
+    effect = "Allow"
+
+    actions = [
+      "wafv2:AssociateWebACL",
+      "wafv2:DisassociateWebACL",
+      "wafv2:GetWebACLForResource"
+    ]
+
+    resources = [
+      "arn:aws:elasticloadbalancing:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.name_prefix}-alb/*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "github_actions_waf" {
+  name   = "${var.name_prefix}-GitHubActions-WAF-Policy"
+  policy = data.aws_iam_policy_document.github_actions_waf_policy.json
+
+  tags = {
+    Name = "${var.name_prefix}-GitHubActions-WAF-Policy"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_waf" {
+  role       = aws_iam_role.github_actions_terraform.name
+  policy_arn = aws_iam_policy.github_actions_waf.arn
 }
