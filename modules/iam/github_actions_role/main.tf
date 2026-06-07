@@ -570,6 +570,18 @@ data "aws_iam_policy_document" "github_actions_waf_policy" {
       "arn:aws:wafv2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:regional/webacl/${var.name_prefix}-waf/*"
     ]
   }
+  statement {
+    sid    = "SetWebAclToAlb"
+    effect = "Allow"
+
+    actions = [
+      "elasticloadbalancing:SetWebACL"
+    ]
+
+    resources = [
+  "arn:aws:elasticloadbalancing:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.name_prefix}ALB/*"
+    ]
+  }
 }
 
 resource "aws_iam_policy" "github_actions_waf" {
