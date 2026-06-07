@@ -504,7 +504,8 @@ data "aws_iam_policy_document" "github_actions_terraform_policy" {
     ]
 
     resources = [
-      "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:SSMRunCommandLogs"
+      "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:SSMRunCommandLogs",
+      "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:SSMRunCommandLogs:*"
     ]
   }
 }
@@ -566,7 +567,7 @@ data "aws_iam_policy_document" "github_actions_waf_policy" {
     ]
 
     resources = [
-      "arn:aws:elasticloadbalancing:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.name_prefix}-alb/*"
+      "arn:aws:wafv2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:regional/webacl/${var.name_prefix}-waf/*"
     ]
   }
 }
