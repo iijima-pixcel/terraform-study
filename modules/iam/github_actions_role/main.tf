@@ -548,28 +548,29 @@ data "aws_iam_policy_document" "github_actions_waf_policy" {
       "wafv2:DeleteWebACL",
       "wafv2:TagResource",
       "wafv2:UntagResource",
-      "wafv2:ListTagsForResource"
-    ]
-
-    resources = [
-      "arn:aws:wafv2:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:regional/webacl/${var.name_prefix}-waf/*"
-    ]
-  }
-
-  statement {
-    sid    = "AssociateWafToAlb"
-    effect = "Allow"
-
-    actions = [
+      "wafv2:ListTagsForResource",
       "wafv2:AssociateWebACL",
-      "wafv2:DisassociateWebACL",
-      "wafv2:GetWebACLForResource"
+      "wafv2:DisassociateWebACL"
     ]
 
     resources = [
       "arn:aws:wafv2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:regional/webacl/${var.name_prefix}-waf/*"
     ]
   }
+
+  statement {
+    sid    = "GetWafAssociation"
+    effect = "Allow"
+
+    actions = [
+      "wafv2:GetWebACLForResource"
+    ]
+
+    resources = [
+      "arn:aws:wafv2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:regional/webacl/*/*"
+    ]
+  }
+
   statement {
     sid    = "SetWebAclToAlb"
     effect = "Allow"
@@ -579,7 +580,7 @@ data "aws_iam_policy_document" "github_actions_waf_policy" {
     ]
 
     resources = [
-  "arn:aws:elasticloadbalancing:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.name_prefix}ALB/*"
+      "arn:aws:elasticloadbalancing:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:loadbalancer/app/${var.name_prefix}ALB/*"
     ]
   }
 }
