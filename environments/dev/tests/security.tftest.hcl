@@ -10,8 +10,8 @@ run "security_test" {
   }
 
   variables {
-    vpc_id                = "vpc-12345678"
-    name_prefix           = "AwsStudy"
+    vpc_id      = "vpc-12345678"
+    name_prefix = "AwsStudy"
   }
 
   assert {
