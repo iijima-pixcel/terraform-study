@@ -127,4 +127,9 @@ run "app_test" {
     condition     = length(output.iam_instance_profile_name) > 0
     error_message = "EC2にはSSM管理用のインスタンスプロファイルが設定されている必要があります"
   }
+
+  assert {
+    condition     = output.ssm_managed_policy_arn == "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    error_message = "EC2 用 IAM Role には AmazonSSMManagedInstanceCore ポリシーがアタッチされている必要があります。"
+  }
 }
