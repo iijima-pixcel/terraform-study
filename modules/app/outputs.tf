@@ -88,6 +88,10 @@ output "ec2_instance_type" {
   value       = aws_instance.app.instance_type
 }
 
+output "iam_instance_profile_name" {
+  value = aws_instance.app.iam_instance_profile
+}
+
 output "ec2_has_public_ip" {
   description = "Whether the EC2 instance is configured with a public IP"
   value       = aws_instance.app.associate_public_ip_address

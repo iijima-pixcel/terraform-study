@@ -43,4 +43,9 @@ run "security_test" {
     condition     = output.has_rds_mysql_rule
     error_message = "RDS Security Group は EC2 からの MySQL(3306) を許可する必要があります。"
   }
+
+  assert {
+    condition     = output.has_ec2_ssh_from_any == false
+    error_message = "EC2のSSHポートはインターネットへ公開されていてはいけません"
+  }
 }

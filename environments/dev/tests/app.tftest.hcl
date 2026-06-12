@@ -122,4 +122,9 @@ run "app_test" {
     condition     = output.rds_low_storage_metric_name == "FreeStorageSpace"
     error_message = "RDS 低ストレージアラームの metric_name は FreeStorageSpace である必要があります。"
   }
+
+  assert {
+    condition     = length(output.iam_instance_profile_name) > 0
+    error_message = "EC2にはSSM管理用のインスタンスプロファイルが設定されている必要があります"
+  }
 }
