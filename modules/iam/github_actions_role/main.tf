@@ -516,7 +516,7 @@ resource "aws_iam_policy" "github_actions_terraform" {
   policy      = data.aws_iam_policy_document.github_actions_terraform_policy.json
 
   tags = {
-    Name    = "${var.role_name}-policy"
+    Name = "${var.role_name}-policy"
   }
 }
 
@@ -597,4 +597,68 @@ resource "aws_iam_policy" "github_actions_waf" {
 resource "aws_iam_role_policy_attachment" "github_actions_waf" {
   role       = aws_iam_role.github_actions_terraform.name
   policy_arn = aws_iam_policy.github_actions_waf.arn
+}
+
+data "aws_iam_policy_document" "github_actions_vpc_endpoints_policy" {
+  statement {
+    sid    = "ManageSsmVpcEndpoints"
+    effect = "Allow"
+
+    actions = [
+      "ec2:CreateVpcEndpoint",
+      "ec2:ModifyVpcEndpoint",
+      "ec2:DeleteVpcEndpoints"
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:VpceServiceName"
+      values = [
+        "com.amazonaws.${var.region}.ssm",
+        "com.amazonaws.${var.region}.ssmmessages",
+        "com.amazonaws.${var.region}.ec2messages"
+      ]
+    }
+  }
+
+  statement {
+    sid    = "DescribeVpcEndpoints"
+    effect = "Allow"
+
+    actions = [
+      "ec2:DescribeVpcEndpoints",
+      "ec2:DescribeVpcEndpointServices"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    sid    = "ManageVpcEndpointTags"
+    effect = "Allow"
+
+    actions = [
+      "ec2:CreateTags",
+      "ec2:DeleteTags"
+    ]
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "github_actions_vpc_endpoints" {
+  name        = "${var.name_prefix}-GitHubActions-VpcEndpoints-Policy"
+  description = "Policy for GitHub Actions to manage SSM VPC endpoints"
+  policy      = data.aws_iam_policy_document.github_actions_vpc_endpoints_policy.json
+
+  tags = {
+    Name = "${var.name_prefix}-GitHubActions-VpcEndpoints-Policy"
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_vpc_endpoints" {
+  role       = aws_iam_role.github_actions_terraform.name
+  policy_arn = aws_iam_policy.github_actions_vpc_endpoints.arn
 }

@@ -23,9 +23,9 @@ output "rds_username" {
   value       = module.app.rds_username
 }
 
-output "ec2_public_ip" {
-  description = "Whether the EC2 instance is configured with a public IP"
-  value       = module.app.ec2_public_ip
+output "ec2_private_ip" {
+  description = "Private IP address of EC2 instance"
+  value       = module.app.ec2_private_ip
 }
 
 output "ec2_security_group_id" {

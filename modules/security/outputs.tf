@@ -69,3 +69,8 @@ output "has_rds_mysql_rule" {
     && rule.protocol == "tcp"
   ]) > 0
 }
+
+output "ssm_vpc_endpoint_sg_id" {
+  description = "Security Group ID for SSM VPC endpoints"
+  value       = aws_security_group.ssm_vpc_endpoint.id
+}

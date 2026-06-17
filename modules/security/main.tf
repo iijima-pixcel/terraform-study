@@ -75,3 +75,29 @@ resource "aws_security_group" "rds" {
     Name = "${var.name_prefix}RdsSecurityGroup"
   }
 }
+# VPC Endpoint security group
+resource "aws_security_group" "ssm_vpc_endpoint" {
+  name        = "${var.name_prefix}-ssm-vpc-endpoint-sg"
+  description = "Allow HTTPS from EC2 to SSM VPC endpoints"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    description     = "HTTPS from EC2"
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ec2.id]
+  }
+
+  egress {
+    description = "All outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.name_prefix}-ssm-vpc-endpoint-sg"
+  }
+}

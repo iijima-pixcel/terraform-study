@@ -1,5 +1,5 @@
 output "aws_study_vpc_id" {
-  description = "ID of the VPC created by the network module"
+  description = "VPC ID"
   value       = aws_vpc.this.id
 }
 
@@ -21,6 +21,14 @@ output "aws_study_private_subnet_1a_id" {
 output "aws_study_private_subnet_1c_id" {
   description = "ID of the private subnet in the second availability zone"
   value       = aws_subnet.private_1c.id
+}
+
+output "private_subnet_ids" {
+  description = "Private subnet IDs"
+  value = [
+    aws_subnet.private_1a.id,
+    aws_subnet.private_1c.id
+  ]
 }
 
 output "vpc_cidr" {

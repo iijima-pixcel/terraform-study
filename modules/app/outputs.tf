@@ -97,9 +97,9 @@ output "ec2_has_public_ip" {
   value       = aws_instance.app.associate_public_ip_address
 }
 
-output "ec2_public_ip" {
-  description = "EC2 public IP for SSH / direct access"
-  value       = aws_instance.app.public_ip
+output "ec2_private_ip" {
+  description = "Private IP address of EC2 instance"
+  value       = aws_instance.app.private_ip
 }
 
 output "rds_instance_class" {
