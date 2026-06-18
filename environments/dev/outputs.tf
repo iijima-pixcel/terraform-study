@@ -42,3 +42,8 @@ output "target_group_arn" {
   description = "ARN of target group"
   value       = module.app.target_group_arn
 }
+
+output "ec2_iam_instance_profile" {
+  description = "IAM Instance Profile attached to the EC2 instance"
+  value       = module.app.ec2_iam_instance_profile
+}
