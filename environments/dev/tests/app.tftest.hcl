@@ -79,8 +79,8 @@ run "app_test" {
   }
 
   assert {
-    condition     = output.ec2_has_public_ip == true
-    error_message = "EC2 は public IP を持つ設定である必要があります。"
+    condition     = output.ec2_has_public_ip == false
+    error_message = "EC2 は private subnet 配置のため public IP を持たない設定である必要があります。"
   }
 
   assert {
