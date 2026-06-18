@@ -611,16 +611,6 @@ data "aws_iam_policy_document" "github_actions_vpc_endpoints_policy" {
     ]
 
     resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "ec2:VpceServiceName"
-      values = [
-        "com.amazonaws.${var.region}.ssm",
-        "com.amazonaws.${var.region}.ssmmessages",
-        "com.amazonaws.${var.region}.ec2messages"
-      ]
-    }
   }
 
   statement {
