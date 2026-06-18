@@ -601,18 +601,52 @@ resource "aws_iam_role_policy_attachment" "github_actions_waf" {
 
 data "aws_iam_policy_document" "github_actions_vpc_endpoints_policy" {
   statement {
-    sid    = "ManageSsmVpcEndpoints"
+    sid    = "CreateTaggedVpcEndpoints"
     effect = "Allow"
 
     actions = [
-      "ec2:CreateVpcEndpoint",
+      "ec2:CreateVpcEndpoint"
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/Project"
+      values   = [var.project]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/Environment"
+      values   = [var.environment]
+    }
+  }
+
+  statement {
+    sid    = "ModifyDeleteTaggedVpcEndpoints"
+    effect = "Allow"
+
+    actions = [
       "ec2:ModifyVpcEndpoint",
       "ec2:DeleteVpcEndpoints"
     ]
 
     resources = ["*"]
-  }
 
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:ResourceTag/Project"
+      values   = [var.project]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "ec2:ResourceTag/Environment"
+      values   = [var.environment]
+    }
+  }
+  
   statement {
     sid    = "DescribeVpcEndpoints"
     effect = "Allow"
