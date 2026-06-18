@@ -10,9 +10,8 @@ run "security_test" {
   }
 
   variables {
-    vpc_id                = "vpc-12345678"
-    cidr_ip_from_internet = "36.8.0.45/32"
-    name_prefix           = "AwsStudy"
+    vpc_id      = "vpc-12345678"
+    name_prefix = "AwsStudy"
   }
 
   assert {
@@ -41,17 +40,12 @@ run "security_test" {
   }
 
   assert {
-    condition     = output.has_ec2_ssh_rule
-    error_message = "EC2 Security Group は指定CIDRからの SSH(22) を許可する必要があります。"
+    condition     = output.has_rds_mysql_rule
+    error_message = "RDS Security Group は EC2 からの MySQL(3306) を許可する必要があります。"
   }
 
   assert {
     condition     = output.has_ec2_ssh_from_any == false
-    error_message = "EC2 の SSH が 0.0.0.0/0 に公開されています（危険）"
-  }
-
-  assert {
-    condition     = output.has_rds_mysql_rule
-    error_message = "RDS Security Group は EC2 からの MySQL(3306) を許可する必要があります。"
+    error_message = "EC2のSSHポートはインターネットへ公開されていてはいけません"
   }
 }

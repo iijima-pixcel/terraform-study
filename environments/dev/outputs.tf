@@ -23,9 +23,9 @@ output "rds_username" {
   value       = module.app.rds_username
 }
 
-output "ec2_public_ip" {
-  description = "Whether the EC2 instance is configured with a public IP"
-  value       = module.app.ec2_public_ip
+output "ec2_private_ip" {
+  description = "Private IP address of EC2 instance"
+  value       = module.app.ec2_private_ip
 }
 
 output "ec2_security_group_id" {
@@ -41,4 +41,9 @@ output "alb_arn" {
 output "target_group_arn" {
   description = "ARN of target group"
   value       = module.app.target_group_arn
+}
+
+output "ec2_iam_instance_profile" {
+  description = "IAM Instance Profile attached to the EC2 instance"
+  value       = module.app.ec2_iam_instance_profile
 }

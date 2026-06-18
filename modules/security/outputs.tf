@@ -49,17 +49,6 @@ output "has_ec2_app_rule" {
   ]) > 0
 }
 
-output "has_ec2_ssh_rule" {
-  description = "Whether the EC2 security group allows SSH from the specified CIDR"
-  value = length([
-    for rule in aws_security_group.ec2.ingress : rule
-    if rule.from_port == 22
-    && rule.to_port == 22
-    && rule.protocol == "tcp"
-    && contains(rule.cidr_blocks, var.cidr_ip_from_internet)
-  ]) > 0
-}
-
 output "has_ec2_ssh_from_any" {
   description = "Whether EC2 security group allows SSH (22) from 0.0.0.0/0"
   value = length([
@@ -79,4 +68,9 @@ output "has_rds_mysql_rule" {
     && rule.to_port == 3306
     && rule.protocol == "tcp"
   ]) > 0
+}
+
+output "ssm_vpc_endpoint_sg_id" {
+  description = "Security Group ID for SSM VPC endpoints"
+  value       = aws_security_group.ssm_vpc_endpoint.id
 }

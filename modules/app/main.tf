@@ -96,11 +96,30 @@ resource "aws_instance" "app" {
   ami                         = var.ami
   instance_type               = "t3.micro"
   key_name                    = var.key_name
-  subnet_id                   = var.public_subnet_1a_id
+  subnet_id                   = var.private_subnet_1a_id
   vpc_security_group_ids      = [var.ec2_security_group_id]
-  associate_public_ip_address = true
+  associate_public_ip_address = false
   iam_instance_profile        = var.iam_instance_profile_name
-  
+
+  user_data = <<-EOF
+    #!/bin/bash
+    set -eux
+
+    if ! systemctl list-unit-files | grep -q amazon-ssm-agent; then
+      if command -v dnf >/dev/null 2>&1; then
+        dnf install -y amazon-ssm-agent
+      elif command -v yum >/dev/null 2>&1; then
+        yum install -y amazon-ssm-agent
+      else
+        echo "No supported package manager found for installing amazon-ssm-agent"
+        exit 1
+      fi
+    fi
+
+    systemctl enable amazon-ssm-agent
+    systemctl restart amazon-ssm-agent
+  EOF
+
   tags = {
     Name = "${var.name_prefix}EC2"
   }
@@ -126,21 +145,21 @@ resource "aws_db_subnet_group" "this" {
 
 # RDS (MySQL)
 resource "aws_db_instance" "this" {
-  identifier              = var.rds_identifier
-  db_name                 = var.rds_db_name
-  allocated_storage       = 20
-  instance_class          = "db.t3.micro"
-  engine                  = "mysql"
-  username                = var.db_master_username
-  password                = data.aws_ssm_parameter.rds_master_password.value
-  db_subnet_group_name    = aws_db_subnet_group.this.name
-  vpc_security_group_ids  = [var.rds_security_group_id]
-  backup_retention_period = 7
-  publicly_accessible     = false
-  multi_az                = false
-  skip_final_snapshot     = true
+  identifier                = var.rds_identifier
+  db_name                   = var.rds_db_name
+  allocated_storage         = 20
+  instance_class            = "db.t3.micro"
+  engine                    = "mysql"
+  username                  = var.db_master_username
+  password                  = data.aws_ssm_parameter.rds_master_password.value
+  db_subnet_group_name      = aws_db_subnet_group.this.name
+  vpc_security_group_ids    = [var.rds_security_group_id]
+  backup_retention_period   = 7
+  publicly_accessible       = false
+  multi_az                  = false
+  skip_final_snapshot       = true
   final_snapshot_identifier = "${lower(var.name_prefix)}-db-final-snapshot"
-  
+
   tags = {
     Name = "${var.name_prefix}RDS"
   }
