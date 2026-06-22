@@ -609,18 +609,6 @@ data "aws_iam_policy_document" "github_actions_vpc_endpoints_policy" {
     ]
 
     resources = ["*"]
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/Project"
-      values   = [var.project]
-    }
-
-    condition {
-      test     = "StringEquals"
-      variable = "aws:RequestTag/Environment"
-      values   = [var.environment]
-    }
   }
 
   statement {
@@ -653,7 +641,8 @@ data "aws_iam_policy_document" "github_actions_vpc_endpoints_policy" {
 
     actions = [
       "ec2:DescribeVpcEndpoints",
-      "ec2:DescribeVpcEndpointServices"
+      "ec2:DescribeVpcEndpointServices",
+      "ec2:DescribeRouteTables"
     ]
 
     resources = ["*"]
