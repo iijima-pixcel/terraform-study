@@ -646,7 +646,7 @@ data "aws_iam_policy_document" "github_actions_vpc_endpoints_policy" {
       values   = [var.environment]
     }
   }
-  
+
   statement {
     sid    = "DescribeVpcEndpoints"
     effect = "Allow"

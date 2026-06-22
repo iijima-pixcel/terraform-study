@@ -31,6 +31,11 @@ output "private_subnet_ids" {
   ]
 }
 
+output "private_route_table_ids" {
+  description = "Private table IDs"
+  value       = [aws_route_table.private.id]
+}
+
 output "vpc_cidr" {
   description = "CIDR block of the VPC"
   value       = aws_vpc.this.cidr_block

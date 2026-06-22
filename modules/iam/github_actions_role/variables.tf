@@ -76,6 +76,6 @@ variable "ansible_artifacts_bucket_name" {
 
 variable "environment" {
   description = "Project environment used for common resource tags"
-  type = string
+  type        = string
   default     = "dev"
 }
