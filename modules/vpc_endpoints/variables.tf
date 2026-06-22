@@ -25,5 +25,5 @@ variable "ssm_vpc_endpoint_sg_id" {
 
 variable "private_route_table_ids" {
   description = "Private route table for S3 endpoint"
-  type        = string
+  type        = list(string)
 }
