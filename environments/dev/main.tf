@@ -45,11 +45,12 @@ module "security" {
 module "vpc_endpoints" {
   source = "../../modules/vpc_endpoints"
 
-  name_prefix            = var.name_prefix
-  region                 = var.region
-  vpc_id                 = module.network.aws_study_vpc_id
-  private_subnet_ids     = module.network.private_subnet_ids
-  ssm_vpc_endpoint_sg_id = module.security.ssm_vpc_endpoint_sg_id
+  name_prefix             = var.name_prefix
+  region                  = var.region
+  vpc_id                  = module.network.aws_study_vpc_id
+  private_subnet_ids      = module.network.private_subnet_ids
+  ssm_vpc_endpoint_sg_id  = module.security.ssm_vpc_endpoint_sg_id
+  private_route_table_ids = module.network.private_route_table_ids
 }
 
 module "app" {

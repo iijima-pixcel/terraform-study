@@ -22,3 +22,8 @@ variable "ssm_vpc_endpoint_sg_id" {
   description = "Security Group ID attached to SSM VPC endpoints"
   type        = string
 }
+
+variable "private_route_table_ids" {
+  description = "Private route table for S3 endpoint"
+  type        = list(string)
+}

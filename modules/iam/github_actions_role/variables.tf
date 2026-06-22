@@ -73,3 +73,9 @@ variable "ansible_artifacts_bucket_name" {
   description = "S3 bucket name for Ansible artifacts"
   type        = string
 }
+
+variable "environment" {
+  description = "Project environment used for common resource tags"
+  type        = string
+  default     = "dev"
+}
