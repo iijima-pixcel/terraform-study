@@ -45,6 +45,6 @@ resource "aws_vpc_endpoint" "s3" {
   route_table_ids   = var.private_route_table_ids
 
   tags = {
-    Name = "${var.name_prefix}-AwsStudy-s3-endpoint"
+    Name = "${var.name_prefix}-s3-endpoint"
   }
 }
