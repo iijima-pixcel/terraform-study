@@ -10,37 +10,11 @@ ALB、EC2、RDSを用いた基本的な3層構成を作成し、GitHub Actions�
 
 ## 構成
 
-```text
-GitHub Actions
-    ↓ OIDC
-AWS IAM Role
-    ↓
-Terraform
-    ↓
-AWS Resources
+![Terraform AWS Portfolio 構成図](docs/images/architecture.png)
 
-Internet
-    ↓
-ALB
-    ↓
-EC2（Private Subnet）
-    ↓
-RDS（Private Subnet）
-```
-
-アプリケーションのデプロイは、GitHub ActionsからSSM Run Commandを実行し、EC2上でAnsible Playbookを実行する流れにしています。
-
-```text
-GitHub Actions
-    ↓
-S3へAnsibleコードをアップロード
-    ↓
-SSM Run Command
-    ↓
-EC2上でAnsible実行
-    ↓
-Spring Bootアプリをデプロイ
-```
+この構成では、ALBのみを外部公開し、EC2とRDSはPrivate Subnetに配置しています。
+GitHub ActionsからOIDCでAWSへ認証し、Terraformによるインフラ構築と、
+SSM Run Command + Ansibleによるアプリケーションデプロイを自動化しています。
 
 ## 使用技術
 
