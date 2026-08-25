@@ -1,10 +1,10 @@
-# SSM SecureString (RDS password)
+# RDSパスワードをSSM Parameter Storeから取得
 data "aws_ssm_parameter" "rds_master_password" {
   name            = var.rds_master_password_ssm_name
   with_decryption = true
 }
 
-# ALB
+# Internet-facing ALB
 resource "aws_lb" "this" {
   name               = "${var.name_prefix}ALB"
   internal           = false
@@ -17,6 +17,7 @@ resource "aws_lb" "this" {
   }
 }
 
+# ALBからEC2:8080へ転送
 resource "aws_lb_target_group" "this" {
   name        = "${var.name_prefix}TargetGroup"
   port        = 8080
@@ -38,6 +39,7 @@ resource "aws_lb_target_group" "this" {
   }
 }
 
+# HTTP:80 Listener
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.this.arn
   port              = 80
@@ -49,6 +51,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
+# AWS Managed Rulesを利用したWAF
 resource "aws_wafv2_web_acl" "this" {
   name  = "${var.name_prefix}-waf"
   scope = "REGIONAL"
@@ -86,12 +89,14 @@ resource "aws_wafv2_web_acl" "this" {
   }
 }
 
+# WAFをALBに関連付け
 resource "aws_wafv2_web_acl_association" "alb" {
   resource_arn = aws_lb.this.arn
   web_acl_arn  = aws_wafv2_web_acl.this.arn
 }
 
-# EC2
+# Private Subnetに配置するアプリケーション用EC2
+# Public IPは付与せず、SSM経由で管理
 resource "aws_instance" "app" {
   ami                         = var.ami
   instance_type               = "t3.micro"
@@ -101,6 +106,7 @@ resource "aws_instance" "app" {
   associate_public_ip_address = false
   iam_instance_profile        = var.iam_instance_profile_name
 
+  # SSM Agentが未導入の場合のみインストールし、起動を有効化
   user_data = <<-EOF
     #!/bin/bash
     set -eux
@@ -143,7 +149,7 @@ resource "aws_db_subnet_group" "this" {
   }
 }
 
-# RDS (MySQL)
+# Private Subnetに配置するMySQL RDS
 resource "aws_db_instance" "this" {
   identifier                = var.rds_identifier
   db_name                   = var.rds_db_name
@@ -180,7 +186,7 @@ resource "aws_sns_topic_subscription" "alarm_email" {
   endpoint  = var.alarm_email
 }
 
-# CloudWatch Alarms
+# EC2ステータスチェック失敗
 resource "aws_cloudwatch_metric_alarm" "ec2_status_check_failed" {
   alarm_name        = "${var.name_prefix}-Ec2StatusCheckFailed"
   alarm_description = "EC2 インスタンスのステータスチェック（システム/インスタンス）が失敗した場合に通知。"
@@ -204,6 +210,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_status_check_failed" {
   }
 }
 
+# EC2 CPU使用率80%超過
 resource "aws_cloudwatch_metric_alarm" "ec2_high_cpu" {
   alarm_name        = "${var.name_prefix}-Ec2HighCpu"
   alarm_description = "EC2 インスタンスの CPUUtilization が 80% を 15 分間超えた場合に通知。"
@@ -227,6 +234,7 @@ resource "aws_cloudwatch_metric_alarm" "ec2_high_cpu" {
   }
 }
 
+# ALB UnHealthyHostCount監視
 resource "aws_cloudwatch_metric_alarm" "alb_unhealthy_host" {
   alarm_name        = "${var.name_prefix}-AlbUnhealthyHost"
   alarm_description = "ALB ターゲットグループで UnHealthyHostCount が一定時間 1 以上のときに通知。回復時は OK 通知も送信。"
@@ -254,6 +262,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_unhealthy_host" {
   }
 }
 
+# ALB 5xxエラー監視
 resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
   alarm_name        = "${var.name_prefix}-Alb5xxHigh"
   alarm_description = "ALB の ELB 5xx エラーが 5 分間で 10 回以上発生した場合に通知。"
@@ -277,6 +286,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
   }
 }
 
+# RDS空き容量5GB未満
 resource "aws_cloudwatch_metric_alarm" "rds_low_storage" {
   alarm_name        = "${var.name_prefix}-RdsLowStorage"
   alarm_description = "RDS の FreeStorageSpace が 5GB 未満になった場合に通知。"

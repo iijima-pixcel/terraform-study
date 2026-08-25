@@ -1,4 +1,4 @@
-# VPC Endpoint
+# Systems Manager APIとの通信用
 resource "aws_vpc_endpoint" "ssm" {
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.ssm"
@@ -11,7 +11,7 @@ resource "aws_vpc_endpoint" "ssm" {
     Name = "${var.name_prefix}-ssm-endpoint"
   }
 }
-
+# Session Managerのセッション・メッセージ通信用
 resource "aws_vpc_endpoint" "ssmmessages" {
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.ssmmessages"
@@ -24,7 +24,7 @@ resource "aws_vpc_endpoint" "ssmmessages" {
     Name = "${var.name_prefix}-ssmmessages-endpoint"
   }
 }
-
+# SSM Agent互換用（現在はssmmessagesを優先）
 resource "aws_vpc_endpoint" "ec2messages" {
   vpc_id              = var.vpc_id
   service_name        = "com.amazonaws.${var.region}.ec2messages"
@@ -37,7 +37,7 @@ resource "aws_vpc_endpoint" "ec2messages" {
     Name = "${var.name_prefix}-ec2messages-endpoint"
   }
 }
-
+# S3 Gateway Endpoint（NAT経由を避ける）
 resource "aws_vpc_endpoint" "s3" {
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.region}.s3"
