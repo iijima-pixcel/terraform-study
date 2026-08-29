@@ -79,14 +79,16 @@ GitHub ActionsからSSM Run Commandを実行し、EC2上でAnsible Playbookを�
 
 ### VPC Endpoint / NAT Gateway構成
 
-EC2をPrivate Subnetに配置しつつ、SSMを利用できるようにするため、以下のVPC Endpointを作成しています。
+EC2をPrivate Subnetに配置したままSystems Managerを利用できるよう、以下のVPC Endpointを作成しています。
 
-* ssm
-* ssmmessages
-* ec2messages
-* s3
+* `ssm`
+* `ssmmessages`
+* `ec2messages`
+* `s3`
 
-また、Ansible実行時に外部パッケージを取得する必要があるため、NAT Gatewayも併用しています。
+Interface VPC EndpointではPrivate DNSを有効化し、通常のAWSサービスエンドポイント名を使用したまま、VPC Endpoint経由でSSM関連通信を行える構成にしています。
+
+一方、Ansible実行時には外部リポジトリからパッケージを取得する必要があるため、インターネット向けOutbound通信にはNAT Gatewayを併用しています。
 
 ## ディレクトリ構成
 
