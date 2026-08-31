@@ -1,6 +1,7 @@
 data "aws_region" "current" {}
 data "aws_caller_identity" "current" {}
 
+# EC2がIAMロールを引き受けるための信頼ポリシー
 data "aws_iam_policy_document" "ec2_assume_role" {
   statement {
     sid    = "Ec2AssumeRole"
@@ -17,6 +18,7 @@ data "aws_iam_policy_document" "ec2_assume_role" {
   }
 }
 
+# EC2用IAMロールとインスタンスプロファイル
 resource "aws_iam_role" "ec2" {
   name               = "${var.name_prefix}-EC2-Role"
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role.json
@@ -31,6 +33,7 @@ resource "aws_iam_instance_profile" "ec2" {
   role = aws_iam_role.ec2.name
 }
 
+# EC2からS3・Parameter Store・CloudWatch Logsへアクセスするための権限
 data "aws_iam_policy_document" "ec2_policy" {
   statement {
     sid    = "ReadAnsibleArtifactsFromS3"
@@ -79,6 +82,7 @@ data "aws_iam_policy_document" "ec2_policy" {
 
     resources = [var.ssm_kms_key_arn]
 
+# KMS復号をParameter Store経由の利用に限定
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"
@@ -118,9 +122,11 @@ resource "aws_iam_policy" "ec2_policy" {
   policy = data.aws_iam_policy_document.ec2_policy.json
 }
 
-resource "aws_iam_role_policy_attachment" "ec2_ssm_attach" {
+# 独自ポリシーとAWS管理ポリシーをEC2ロールへ付与
+resource "aws_iam_role_policy_attachment" "ec2_custom_policy_attach" {
   role       = aws_iam_role.ec2.name
   policy_arn = aws_iam_policy.ec2_policy.arn
+
 }
 
 resource "aws_iam_role_policy_attachment" "ec2_ssm_managed_instance_core" {

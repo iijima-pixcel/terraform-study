@@ -51,7 +51,7 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-# AWS Managed Rulesを利用したWAF
+# 一般的なWeb攻撃への基本対策としてAWS Managed Rulesを適用
 resource "aws_wafv2_web_acl" "this" {
   name  = "${var.name_prefix}-waf"
   scope = "REGIONAL"
@@ -249,7 +249,6 @@ resource "aws_cloudwatch_metric_alarm" "alb_unhealthy_host" {
   comparison_operator = "GreaterThanThreshold"
   treat_missing_data  = "notBreaching"
 
-  # CloudFormation と同じ dimensions
   dimensions = {
     LoadBalancer = aws_lb.this.arn_suffix
     TargetGroup  = aws_lb_target_group.this.arn_suffix
