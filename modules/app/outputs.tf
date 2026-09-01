@@ -33,9 +33,13 @@ output "alb_dns_name" {
   value       = aws_lb.this.dns_name
 }
 
-output "ec2_instance_id" {
-  description = "ID of the EC2 instance created by this module"
-  value       = aws_instance.app.id
+output "ec2_instance_ids" {
+  description = "IDs of the EC2 instances created by this module"
+
+  value = {
+    for az, instance in aws_instance.app :
+    az => instance.id
+  }
 }
 
 output "rds_endpoint" {
@@ -83,28 +87,36 @@ output "listener_default_action_type" {
   value       = aws_lb_listener.http.default_action[0].type
 }
 
-output "ec2_instance_type" {
-  description = "Instance type of the EC2 instance"
-  value       = aws_instance.app.instance_type
+output "ec2_instance_types" {
+  description = "Instance types of the EC2 instances"
+
+  value = {
+    for az, instance in aws_instance.app :
+    az => instance.instance_type
+  }
 }
 
 output "iam_instance_profile_name" {
-  value = aws_instance.app.iam_instance_profile
+  description = "IAM Instance Profile attached to the EC2 instances"
+  value       = var.iam_instance_profile_name
 }
 
-output "ec2_iam_instance_profile" {
-  description = "IAM Instance Profile attached to the EC2 instance"
-  value       = aws_instance.app.iam_instance_profile
+output "ec2_has_public_ips" {
+  description = "Whether the EC2 instances are configured with public IPs"
+
+  value = {
+    for az, instance in aws_instance.app :
+    az => instance.associate_public_ip_address
+  }
 }
 
-output "ec2_has_public_ip" {
-  description = "Whether the EC2 instance is configured with a public IP"
-  value       = aws_instance.app.associate_public_ip_address
-}
+output "ec2_private_ips" {
+  description = "Private IP addresses of the EC2 instances"
 
-output "ec2_private_ip" {
-  description = "Private IP address of EC2 instance"
-  value       = aws_instance.app.private_ip
+  value = {
+    for az, instance in aws_instance.app :
+    az => instance.private_ip
+  }
 }
 
 output "rds_instance_class" {

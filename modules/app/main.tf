@@ -3,6 +3,13 @@ data "aws_ssm_parameter" "rds_master_password" {
   name            = var.rds_master_password_ssm_name
   with_decryption = true
 }
+# マルチAZに使用
+locals {
+  app_instances = {
+    "1a" = var.private_subnet_1a_id
+    "1c" = var.private_subnet_1c_id
+  }
+}
 
 # Internet-facing ALB
 resource "aws_lb" "this" {
@@ -98,10 +105,12 @@ resource "aws_wafv2_web_acl_association" "alb" {
 # Private Subnetに配置するアプリケーション用EC2
 # Public IPは付与せず、SSM経由で管理
 resource "aws_instance" "app" {
+  for_each = local.app_instances
+
   ami                         = var.ami
   instance_type               = "t3.micro"
   key_name                    = var.key_name
-  subnet_id                   = var.private_subnet_1a_id
+  subnet_id                   = each.value
   vpc_security_group_ids      = [var.ec2_security_group_id]
   associate_public_ip_address = false
   iam_instance_profile        = var.iam_instance_profile_name
@@ -127,14 +136,16 @@ resource "aws_instance" "app" {
   EOF
 
   tags = {
-    Name = "${var.name_prefix}EC2"
+    Name = "${var.name_prefix}EC2-${each.key}"
   }
 }
 
-# TargetGroup
+# EC2をTarget Groupへ登録
 resource "aws_lb_target_group_attachment" "app" {
+  for_each = aws_instance.app
+
   target_group_arn = aws_lb_target_group.this.arn
-  target_id        = aws_instance.app.id
+  target_id        = each.value.id
   port             = 8080
 }
 
