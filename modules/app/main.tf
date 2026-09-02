@@ -199,7 +199,9 @@ resource "aws_sns_topic_subscription" "alarm_email" {
 
 # EC2ステータスチェック失敗
 resource "aws_cloudwatch_metric_alarm" "ec2_status_check_failed" {
-  alarm_name        = "${var.name_prefix}-Ec2StatusCheckFailed"
+  for_each = aws_instance.app
+
+  alarm_name        = "${var.name_prefix}-Ec2StatusCheckFailed-${each.key}"
   alarm_description = "EC2 インスタンスのステータスチェック（システム/インスタンス）が失敗した場合に通知。"
 
   namespace           = "AWS/EC2"
@@ -212,18 +214,21 @@ resource "aws_cloudwatch_metric_alarm" "ec2_status_check_failed" {
   treat_missing_data  = "ignore"
 
   dimensions = {
-    InstanceId = aws_instance.app.id
+    InstanceId = each.value.id
   }
 
   alarm_actions = [aws_sns_topic.alarm.arn]
+
   tags = {
-    Name = "${var.name_prefix}Ec2StatusCheckFailedAlarm"
+    Name = "${var.name_prefix}Ec2StatusCheckFailedAlarm-${each.key}"
   }
 }
 
 # EC2 CPU使用率80%超過
 resource "aws_cloudwatch_metric_alarm" "ec2_high_cpu" {
-  alarm_name        = "${var.name_prefix}-Ec2HighCpu"
+  for_each = aws_instance.app
+
+  alarm_name        = "${var.name_prefix}-Ec2HighCpu-${each.key}"
   alarm_description = "EC2 インスタンスの CPUUtilization が 80% を 15 分間超えた場合に通知。"
 
   namespace           = "AWS/EC2"
@@ -236,12 +241,13 @@ resource "aws_cloudwatch_metric_alarm" "ec2_high_cpu" {
   treat_missing_data  = "missing"
 
   dimensions = {
-    InstanceId = aws_instance.app.id
+    InstanceId = each.value.id
   }
 
   alarm_actions = [aws_sns_topic.alarm.arn]
+
   tags = {
-    Name = "${var.name_prefix}CpuHighAlarm"
+    Name = "${var.name_prefix}CpuHighAlarm-${each.key}"
   }
 }
 
