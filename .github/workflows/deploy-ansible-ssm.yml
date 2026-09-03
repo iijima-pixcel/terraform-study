@@ -47,7 +47,7 @@ jobs:
       - name: Get Terraform outputs
         working-directory: environments/dev
         run: |
-          echo "EC2_INSTANCE_ID=$(terraform output -raw ec2_instance_id)" >> $GITHUB_ENV
+          echo "EC2_INSTANCE_IDS=$(terraform output -json ec2_instance_ids | jq -c 'values')" >> $GITHUB_ENV
           echo "RDS_ENDPOINT=$(terraform output -raw rds_endpoint)" >> $GITHUB_ENV
 
       - name: Zip Ansible code
@@ -60,9 +60,11 @@ jobs:
 
       - name: Run Ansible on EC2 via SSM
         run: |
+          mapfile -t INSTANCE_IDS < <(echo "${EC2_INSTANCE_IDS}" | jq -r '.[]')
+
           COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
-            --instance-ids "${EC2_INSTANCE_ID}" \
+            --instance-ids "${INSTANCE_IDS[@]}" \
             --comment "Run Ansible deploy" \
             --parameters 'commands=[
               "set -e",
@@ -101,6 +103,7 @@ jobs:
             sleep 10
           done
 
+          for INSTANCE_ID in "${INSTANCE_IDS[@]}"; do
           aws ssm get-command-invocation \
             --command-id "${COMMAND_ID}" \
             --instance-id "${EC2_INSTANCE_ID}"
