@@ -3,31 +3,6 @@ output "alarm_notification_topic_arn" {
   value       = aws_sns_topic.alarm.arn
 }
 
-output "ec2_status_check_failed_alarm_arn" {
-  description = "ARN of the CloudWatch alarm for EC2 status check failures"
-  value       = aws_cloudwatch_metric_alarm.ec2_status_check_failed.arn
-}
-
-output "ec2_high_cpu_alarm_arn" {
-  description = "ARN of the CloudWatch alarm for high EC2 CPU utilization"
-  value       = aws_cloudwatch_metric_alarm.ec2_high_cpu.arn
-}
-
-output "alb_unhealthy_host_alarm_arn" {
-  description = "ARN of the CloudWatch alarm for unhealthy ALB targets"
-  value       = aws_cloudwatch_metric_alarm.alb_unhealthy_host.arn
-}
-
-output "alb_5xx_alarm_arn" {
-  description = "ARN of the CloudWatch alarm for ALB 5xx errors"
-  value       = aws_cloudwatch_metric_alarm.alb_5xx.arn
-}
-
-output "rds_low_storage_alarm_arn" {
-  description = "ARN of the CloudWatch alarm for low RDS free storage space"
-  value       = aws_cloudwatch_metric_alarm.rds_low_storage.arn
-}
-
 output "alb_dns_name" {
   description = "DNS name of the Application Load Balancer"
   value       = aws_lb.this.dns_name
@@ -144,9 +119,18 @@ output "sns_subscription_protocol" {
   value       = aws_sns_topic_subscription.alarm_email.protocol
 }
 
-output "ec2_high_cpu_metric_name" {
-  description = "Metric name of the high EC2 CPU alarm"
-  value       = aws_cloudwatch_metric_alarm.ec2_high_cpu.metric_name
+output "ec2_high_cpu_alarm_names" {
+  value = {
+    for key, alarm in aws_cloudwatch_metric_alarm.ec2_high_cpu :
+    key => alarm.alarm_name
+  }
+}
+
+output "ec2_status_check_failed_alarm_names" {
+  value = {
+    for key, alarm in aws_cloudwatch_metric_alarm.ec2_status_check_failed :
+    key => alarm.alarm_name
+  } 
 }
 
 output "alb_5xx_metric_name" {
