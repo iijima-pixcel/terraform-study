@@ -45,5 +45,5 @@ output "target_group_arn" {
 
 output "ec2_iam_instance_profile" {
   description = "IAM Instance Profile attached to the EC2 instance"
-  value       = module.app.ec2_iam_instance_profile
+  value       = module.app.iam_instance_profile_name
 }
