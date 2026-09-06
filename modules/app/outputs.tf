@@ -130,7 +130,7 @@ output "ec2_status_check_failed_alarm_names" {
   value = {
     for key, alarm in aws_cloudwatch_metric_alarm.ec2_status_check_failed :
     key => alarm.alarm_name
-  } 
+  }
 }
 
 output "alb_5xx_metric_name" {
