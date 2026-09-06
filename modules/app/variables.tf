@@ -17,7 +17,7 @@ variable "ami" {
 variable "alarm_email" {
   description = "Email address to receive CloudWatch alarm notifications"
   type        = string
-  sensitive = true
+  sensitive   = true
 }
 
 variable "vpc_id" {

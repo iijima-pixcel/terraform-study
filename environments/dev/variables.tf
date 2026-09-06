@@ -60,7 +60,7 @@ variable "ami" {
 variable "alarm_email" {
   description = "Email address subscribed to SNS alarm notifications"
   type        = string
-  sensitive = true
+  sensitive   = true
 }
 
 variable "db_master_username" {
