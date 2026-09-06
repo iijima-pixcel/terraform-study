@@ -82,7 +82,7 @@ data "aws_iam_policy_document" "ec2_policy" {
 
     resources = [var.ssm_kms_key_arn]
 
-# KMS復号をParameter Store経由の利用に限定
+    # KMS復号をParameter Store経由の利用に限定
     condition {
       test     = "StringEquals"
       variable = "kms:ViaService"

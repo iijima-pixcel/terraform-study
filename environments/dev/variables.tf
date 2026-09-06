@@ -52,24 +52,15 @@ variable "private_subnet_1c_cidr" {
   default     = "10.10.20.0/24"
 }
 
-variable "cidr_ip_from_internet" {
-  description = "CIDR block allowed to access the ALB from the internet"
-  type        = string
-}
-
 variable "ami" {
   description = "AMI ID for the EC2 instance"
-  type        = string
-}
-
-variable "key_name" {
-  description = "EC2 key pair name for SSH access"
   type        = string
 }
 
 variable "alarm_email" {
   description = "Email address subscribed to SNS alarm notifications"
   type        = string
+  sensitive   = true
 }
 
 variable "db_master_username" {

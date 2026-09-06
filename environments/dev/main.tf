@@ -36,10 +36,9 @@ module "network" {
 }
 
 module "security" {
-  source                = "../../modules/security"
-  name_prefix           = var.name_prefix
-  vpc_id                = module.network.aws_study_vpc_id
-  cidr_ip_from_internet = var.cidr_ip_from_internet
+  source      = "../../modules/security"
+  name_prefix = var.name_prefix
+  vpc_id      = module.network.aws_study_vpc_id
 }
 
 module "vpc_endpoints" {
@@ -58,7 +57,6 @@ module "app" {
   name_prefix = var.name_prefix
 
   ami         = var.ami
-  key_name    = var.key_name
   alarm_email = var.alarm_email
 
   iam_instance_profile_name = data.aws_iam_instance_profile.ec2.name
