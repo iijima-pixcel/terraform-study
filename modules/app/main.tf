@@ -109,7 +109,6 @@ resource "aws_instance" "app" {
 
   ami                         = var.ami
   instance_type               = "t3.micro"
-  key_name                    = var.key_name
   subnet_id                   = each.value
   vpc_security_group_ids      = [var.ec2_security_group_id]
   associate_public_ip_address = false

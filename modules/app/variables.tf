@@ -3,7 +3,6 @@ variable "name_prefix" {
   type        = string
 }
 
-# CloudFormation Parameters
 variable "db_master_username" {
   description = "Master username for the RDS database"
   type        = string
@@ -15,14 +14,10 @@ variable "ami" {
   type        = string
 }
 
-variable "key_name" {
-  description = "Name of the EC2 key pair used for SSH access"
-  type        = string
-}
-
 variable "alarm_email" {
   description = "Email address to receive CloudWatch alarm notifications"
   type        = string
+  sensitive = true
 }
 
 variable "vpc_id" {
