@@ -46,7 +46,9 @@ SSM Run Command + Ansibleによるアプリケーションデプロイを自動�
 
 VPC、Public Subnet、Private Subnet、ALB、EC2、RDSなどをTerraformで構築しています。
 
-EC2とRDSはPrivate Subnetに配置し、外部から直接アクセスできない構成にしています。外部公開はALBのみとし、ALB経由でEC2へアクセスする設計にしています。
+EC2は2つのAZのPrivate Subnetに1台ずつ配置し、ALBから2台へ振り分けることでアプリケーション層の冗長性を高めています。
+
+EC2とRDSはPrivate Subnetに配置し、インターネットから直接アクセスできない構成としています。外部公開はALBのみとしています。
 
 ### tfstateのリモート管理
 
@@ -73,9 +75,9 @@ IAM Roleの信頼ポリシーでは、特定のGitHubリポジトリ、mainブ�
 
 ### SSM Run Command + Ansibleによる自動デプロイ
 
-EC2はPrivate Subnetに配置しているため、SSHではなくSSM Run Commandを使用して操作しています。
+EC2はPrivate Subnetに配置し、SSHではなくSystems Managerを使用して管理しています。
 
-GitHub ActionsからSSM Run Commandを実行し、EC2上でAnsible Playbookを実行することで、Spring Bootアプリケーションのデプロイを自動化しています。
+GitHub ActionsからSSM Run Commandを実行し、EC2上でAnsible Playbookを実行することで、Spring Bootの実行環境構築を自動化しています。
 
 ### VPC Endpoint / NAT Gateway構成
 

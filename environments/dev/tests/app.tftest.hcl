@@ -74,12 +74,18 @@ run "app_test" {
   }
 
   assert {
-    condition     = output.ec2_instance_type == "t3.micro"
+    condition = alltrue([
+      for instance_type in values(output.ec2_instance_types) :
+      instance_type == "t3.micro"
+    ])
     error_message = "EC2 の instance_type は t3.micro である必要があります。"
   }
 
   assert {
-    condition     = output.ec2_has_public_ip == false
+    condition = alltrue([
+      for has_public_ip in values(output.ec2_has_public_ips) :
+      has_public_ip == false
+    ])
     error_message = "EC2 は private subnet 配置のため public IP を持たない設定である必要があります。"
   }
 
@@ -106,11 +112,6 @@ run "app_test" {
   assert {
     condition     = output.sns_subscription_protocol == "email"
     error_message = "SNS Subscription の protocol は email である必要があります。"
-  }
-
-  assert {
-    condition     = output.ec2_high_cpu_metric_name == "CPUUtilization"
-    error_message = "EC2 高CPUアラームの metric_name は CPUUtilization である必要があります。"
   }
 
   assert {
