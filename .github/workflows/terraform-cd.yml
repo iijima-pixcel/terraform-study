@@ -20,7 +20,6 @@ jobs:
 
     env:
       TF_VAR_ami: ${{ secrets.AMI }}
-      TF_VAR_key_name: ${{ secrets.KEY_NAME }}
       TF_VAR_alarm_email: ${{ secrets.ALARM_EMAIL }}
 
     steps:
