@@ -172,7 +172,7 @@ resource "aws_db_instance" "this" {
   vpc_security_group_ids    = [var.rds_security_group_id]
   backup_retention_period   = 7
   publicly_accessible       = false
-  multi_az                  = false
+  multi_az                  = true
   skip_final_snapshot       = true
   final_snapshot_identifier = "${lower(var.name_prefix)}-db-final-snapshot"
 
