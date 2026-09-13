@@ -18,10 +18,6 @@ resource "aws_iam_openid_connect_provider" "github" {
   ]
 
   thumbprint_list = var.github_oidc_thumbprints
-
-  tags = {
-    Name = "${var.name_prefix}-github-oidc"
-  }
 }
 
 data "aws_iam_policy_document" "github_actions_assume_role" {
@@ -57,9 +53,6 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
 
 resource "aws_iam_role" "github_actions_terraform" {
   name               = var.role_name
+  description        = "IAM role for GitHub Actions Terraform execution"
   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
-
-  tags = {
-    Name = var.role_name
-  }
 }

@@ -61,13 +61,9 @@ data "aws_iam_policy_document" "github_actions_vpc_endpoints_policy" {
 }
 
 resource "aws_iam_policy" "github_actions_vpc_endpoints" {
-  name        = "${var.name_prefix}-GitHubActions-VpcEndpoints-Policy"
+  name   = "${var.name_prefix}-GitHubActions-VpcEndpoints-Policy"
   description = "Policy for GitHub Actions to manage SSM VPC endpoints"
-  policy      = data.aws_iam_policy_document.github_actions_vpc_endpoints_policy.json
-
-  tags = {
-    Name = "${var.name_prefix}-GitHubActions-VpcEndpoints-Policy"
-  }
+  policy = data.aws_iam_policy_document.github_actions_vpc_endpoints_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_vpc_endpoints" {

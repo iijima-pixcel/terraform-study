@@ -119,6 +119,7 @@ data "aws_iam_policy_document" "github_actions_app_policy" {
 
 resource "aws_iam_policy" "github_actions_app" {
   name   = "${var.name_prefix}-GitHubActions-App"
+  description = "Application infrastructure permissions for GitHub Actions Terraform execution"
   policy = data.aws_iam_policy_document.github_actions_app_policy.json
 }
 

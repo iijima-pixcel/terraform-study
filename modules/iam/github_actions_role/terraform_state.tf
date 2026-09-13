@@ -46,7 +46,7 @@ data "aws_iam_policy_document" "github_actions_core_policy" {
   }
 
 
-   statement {
+  statement {
     sid    = "SsmReadPassword"
     effect = "Allow"
 
@@ -77,13 +77,9 @@ data "aws_iam_policy_document" "github_actions_core_policy" {
 }
 
 resource "aws_iam_policy" "github_actions_core" {
-  name        = "${var.role_name}-policy"
-  description = "Policy for GitHub Actions Terraform execution role"
-  policy      = data.aws_iam_policy_document.github_actions_core_policy.json
-
-  tags = {
-    Name = "${var.role_name}-policy"
-  }
+  name   = "${var.name_prefix}-GitHub-Actions-Terraform-Core"
+  description = "Core permissions for GitHub Actions Terraform execution"
+  policy = data.aws_iam_policy_document.github_actions_core_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_core" {

@@ -170,6 +170,7 @@ data "aws_iam_policy_document" "github_actions_operations_policy" {
 
 resource "aws_iam_policy" "github_actions_operations" {
   name   = "${var.name_prefix}-GitHubActions-Operations"
+  description = "Operations permissions for GitHub Actions Terraform execution"
   policy = data.aws_iam_policy_document.github_actions_operations_policy.json
 }
 
