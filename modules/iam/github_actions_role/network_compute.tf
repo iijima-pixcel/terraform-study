@@ -114,9 +114,9 @@ data "aws_iam_policy_document" "github_actions_network_compute_policy" {
 }
 
 resource "aws_iam_policy" "github_actions_network_compute" {
-  name   = "${var.name_prefix}-GitHubActions-Network-Compute"
+  name        = "${var.name_prefix}-GitHubActions-Network-Compute"
   description = "Network and compute permissions for GitHub Actions Terraform execution"
-  policy = data.aws_iam_policy_document.github_actions_network_compute_policy.json
+  policy      = data.aws_iam_policy_document.github_actions_network_compute_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_network_compute" {

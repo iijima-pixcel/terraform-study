@@ -102,20 +102,23 @@ resource "aws_wafv2_web_acl_association" "alb" {
   web_acl_arn  = aws_wafv2_web_acl.this.arn
 }
 
-# Private Subnetに配置するアプリケーション用EC2
-# Public IPは付与せず、SSM経由で管理
-resource "aws_instance" "app" {
-  for_each = local.app_instances
+# スケーリング用テンプレート
+resource "aws_launch_template" "app" {
+  name_prefix   = "${var.name_prefix}-app-"
+  image_id      = var.ami
+  instance_type = "t3.micro"
 
-  ami                         = var.ami
-  instance_type               = "t3.micro"
-  subnet_id                   = each.value
-  vpc_security_group_ids      = [var.ec2_security_group_id]
-  associate_public_ip_address = false
-  iam_instance_profile        = var.iam_instance_profile_name
+  iam_instance_profile {
+    name = var.iam_instance_profile_name
+  }
 
-  # SSM Agentが未導入の場合のみインストールし、起動を有効化
-  user_data = <<-EOF
+  network_interfaces {
+    associate_public_ip_address = false
+    security_groups             = [var.ec2_security_group_id]
+  }
+
+  # Launch Template の user_data は Base64 エンコードする
+  user_data = base64encode(<<-EOF
     #!/bin/bash
     set -eux
 
@@ -133,19 +136,45 @@ resource "aws_instance" "app" {
     systemctl enable amazon-ssm-agent
     systemctl restart amazon-ssm-agent
   EOF
+  )
 
-  tags = {
-    Name = "${var.name_prefix}EC2-${each.key}"
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "${var.name_prefix}EC2-ASG"
+    }
   }
 }
 
-# EC2をTarget Groupへ登録
-resource "aws_lb_target_group_attachment" "app" {
-  for_each = aws_instance.app
+resource "aws_autoscaling_group" "app" {
+  name = "${var.name_prefix}-app-asg"
 
-  target_group_arn = aws_lb_target_group.this.arn
-  target_id        = each.value.id
-  port             = 8080
+  min_size         = 2
+  desired_capacity = 2
+  max_size         = 2
+
+  # 1a / 1c のPrivate Subnet
+  vpc_zone_identifier = values(local.app_instances)
+
+  # ASGで作成したEC2をTarget Groupへ自動登録
+  target_group_arns = [
+    aws_lb_target_group.this.arn
+  ]
+
+  launch_template {
+    id      = aws_launch_template.app.id
+    version = "$Latest"
+  }
+
+  # 今はAnsibleで後からアプリを入れるためEC2ヘルスチェックにする
+  health_check_type = "EC2"
+
+  tag {
+    key                 = "Role"
+    value               = "app"
+    propagate_at_launch = true
+  }
 }
 
 # RDS Subnet Group
@@ -196,57 +225,18 @@ resource "aws_sns_topic_subscription" "alarm_email" {
   endpoint  = var.alarm_email
 }
 
-# EC2ステータスチェック失敗
-resource "aws_cloudwatch_metric_alarm" "ec2_status_check_failed" {
-  for_each = aws_instance.app
+# ASG全体の平均CPU使用率を50%付近に維持
+resource "aws_autoscaling_policy" "cpu_target_tracking" {
+  name                   = "${var.name_prefix}-cpu-target-tracking"
+  policy_type            = "TargetTrackingScaling"
+  autoscaling_group_name = aws_autoscaling_group.app.name
 
-  alarm_name        = "${var.name_prefix}-Ec2StatusCheckFailed-${each.key}"
-  alarm_description = "EC2 インスタンスのステータスチェック（システム/インスタンス）が失敗した場合に通知。"
+  target_tracking_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ASGAverageCPUUtilization"
+    }
 
-  namespace           = "AWS/EC2"
-  metric_name         = "StatusCheckFailed"
-  statistic           = "Maximum"
-  period              = 60
-  evaluation_periods  = 1
-  threshold           = 0
-  comparison_operator = "GreaterThanThreshold"
-  treat_missing_data  = "ignore"
-
-  dimensions = {
-    InstanceId = each.value.id
-  }
-
-  alarm_actions = [aws_sns_topic.alarm.arn]
-
-  tags = {
-    Name = "${var.name_prefix}Ec2StatusCheckFailedAlarm-${each.key}"
-  }
-}
-
-# EC2 CPU使用率80%超過
-resource "aws_cloudwatch_metric_alarm" "ec2_high_cpu" {
-  for_each = aws_instance.app
-
-  alarm_name        = "${var.name_prefix}-Ec2HighCpu-${each.key}"
-  alarm_description = "EC2 インスタンスの CPUUtilization が 80% を 15 分間超えた場合に通知。"
-
-  namespace           = "AWS/EC2"
-  metric_name         = "CPUUtilization"
-  statistic           = "Average"
-  period              = 300
-  evaluation_periods  = 3
-  threshold           = 80
-  comparison_operator = "GreaterThanThreshold"
-  treat_missing_data  = "missing"
-
-  dimensions = {
-    InstanceId = each.value.id
-  }
-
-  alarm_actions = [aws_sns_topic.alarm.arn]
-
-  tags = {
-    Name = "${var.name_prefix}CpuHighAlarm-${each.key}"
+    target_value = 60.0
   }
 }
 

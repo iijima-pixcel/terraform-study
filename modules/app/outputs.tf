@@ -8,13 +8,14 @@ output "alb_dns_name" {
   value       = aws_lb.this.dns_name
 }
 
-output "ec2_instance_ids" {
-  description = "IDs of the EC2 instances created by this module"
+output "autoscaling_group_name" {
+  description = "Name of the application Auto Scaling Group"
+  value       = aws_autoscaling_group.app.name
+}
 
-  value = {
-    for az, instance in aws_instance.app :
-    az => instance.id
-  }
+output "launch_template_id" {
+  description = "ID of the application Launch Template"
+  value       = aws_launch_template.app.id
 }
 
 output "rds_endpoint" {
@@ -62,37 +63,11 @@ output "listener_default_action_type" {
   value       = aws_lb_listener.http.default_action[0].type
 }
 
-output "ec2_instance_types" {
-  description = "Instance types of the EC2 instances"
-
-  value = {
-    for az, instance in aws_instance.app :
-    az => instance.instance_type
-  }
-}
-
 output "iam_instance_profile_name" {
   description = "IAM Instance Profile attached to the EC2 instances"
   value       = var.iam_instance_profile_name
 }
 
-output "ec2_has_public_ips" {
-  description = "Whether the EC2 instances are configured with public IPs"
-
-  value = {
-    for az, instance in aws_instance.app :
-    az => instance.associate_public_ip_address
-  }
-}
-
-output "ec2_private_ips" {
-  description = "Private IP addresses of the EC2 instances"
-
-  value = {
-    for az, instance in aws_instance.app :
-    az => instance.private_ip
-  }
-}
 
 output "rds_instance_class" {
   description = "Instance class of the RDS instance"
@@ -119,19 +94,6 @@ output "sns_subscription_protocol" {
   value       = aws_sns_topic_subscription.alarm_email.protocol
 }
 
-output "ec2_high_cpu_alarm_names" {
-  value = {
-    for key, alarm in aws_cloudwatch_metric_alarm.ec2_high_cpu :
-    key => alarm.alarm_name
-  }
-}
-
-output "ec2_status_check_failed_alarm_names" {
-  value = {
-    for key, alarm in aws_cloudwatch_metric_alarm.ec2_status_check_failed :
-    key => alarm.alarm_name
-  }
-}
 
 output "alb_5xx_metric_name" {
   description = "Metric name of the ALB 5xx alarm"

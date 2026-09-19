@@ -3,11 +3,6 @@ output "alb_dns_name" {
   value       = module.app.alb_dns_name
 }
 
-output "ec2_instance_ids" {
-  description = "IDs of the EC2 instances"
-  value       = module.app.ec2_instance_ids
-}
-
 output "rds_endpoint" {
   description = "Endpoint address of the RDS instance"
   value       = module.app.rds_endpoint
@@ -21,11 +16,6 @@ output "rds_db_name" {
 output "rds_username" {
   description = "Master username for RDS"
   value       = module.app.rds_username
-}
-
-output "ec2_private_ips" {
-  description = "Private IP address of EC2 instance"
-  value       = module.app.ec2_private_ips
 }
 
 output "ec2_security_group_id" {

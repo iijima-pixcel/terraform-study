@@ -82,11 +82,20 @@ run "app_test" {
   }
 
   assert {
+    condition = (
+      aws_launch_template.app.network_interfaces[0].associate_public_ip_address == false
+    )
+
+    error_message = "Launch Template は EC2 に Public IP を付与しない設定である必要があります。"
+  }
+
+  assert {
     condition = alltrue([
-      for has_public_ip in values(output.ec2_has_public_ips) :
-      has_public_ip == false
+      for subnet in values(aws_subnet.private) :
+      subnet.map_public_ip_on_launch == false
     ])
-    error_message = "EC2 は private subnet 配置のため public IP を持たない設定である必要があります。"
+
+    error_message = "Private Subnet は Public IP を自動割り当てしない設定である必要があります。"
   }
 
   assert {
