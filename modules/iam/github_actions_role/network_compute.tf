@@ -111,7 +111,45 @@ data "aws_iam_policy_document" "github_actions_network_compute_policy" {
       values   = [var.project]
     }
   }
+  
+  statement {
+    sid    = "CreateLaunchTemplate"
+    effect = "Allow"
+
+    actions = [
+      "ec2:CreateLaunchTemplate"
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:RequestTag/Project"
+      values   = [var.project]
+    }
+  }
+
+  statement {
+    sid    = "ManageProjectLaunchTemplate"
+    effect = "Allow"
+
+    actions = [
+      "ec2:CreateLaunchTemplateVersion",
+      "ec2:ModifyLaunchTemplate",
+      "ec2:DeleteLaunchTemplate",
+      "ec2:DeleteLaunchTemplateVersions"
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceTag/Project"
+      values   = [var.project]
+    }
+  }
 }
+
 
 resource "aws_iam_policy" "github_actions_network_compute" {
   name        = "${var.name_prefix}-GitHubActions-Network-Compute"
