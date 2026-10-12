@@ -4,25 +4,27 @@
 
 Terraformを用いてAWS上にWebアプリケーション実行環境を構築したポートフォリオです。
 
-ALB、EC2、RDSを用いた基本的な3層構成を作成し、EC2は2つのAvailability Zone（AZ）のPrivate Subnetに1台ずつ配置しています。
+ALB、EC2、RDSを用いた基本的な3層構成を作成し、EC2は2つのAvailability Zone（AZ）のPrivate Subnetに1台ずつ配置しています。RDSはMulti-AZ構成とし、データベース層の可用性を高めています。
 
 GitHub ActionsによるCI/CD、SSM Run Command + Ansibleによるアプリケーション自動デプロイまで実装しています。
 
 また、TerraformのstateはS3 + DynamoDBでリモート管理し、複数環境での運用を想定した構成にしています。
 
+**現時点ではAuto Scaling Group（ASG）は未導入です。** EC2は2台を固定配置しており、障害時にEC2を自動補充する仕組みは実装していません。
+
 ---
 
 ## 構成
 
-![Terraform AWS Portfolio 構成図](docs\images\arc_multi.png)
+![Terraform AWS Portfolio 構成図](docs/images/arc_multi.png)
 
 この構成では、ALBのみを外部公開し、EC2とRDSはPrivate Subnetに配置しています。
 
-EC2はap-northeast-1a / 1cのPrivate Subnetに1台ずつ配置し、ALBから2台へ通信を振り分けています。
+EC2はap-northeast-1a / 1cのPrivate Subnetに1台ずつ配置し、ALBから2台へ通信を振り分けています。EC2の2台は**ASGによる管理ではなく、固定台数としてTerraformで作成**しています。
+
+RDS（MySQL）はMulti-AZ DBインスタンス構成です。通常時はプライマリがアクセスを処理し、別AZのスタンバイにデータを同期します。
 
 GitHub ActionsからOIDCでAWSへ認証し、Terraformによるインフラ構築と、SSM Run Command + Ansibleによるアプリケーションデプロイを自動化しています。
-
-なお、ALBとEC2を含むアプリケーション層は複数AZ構成ですが、NAT Gatewayは1AZに1台、RDSはSingle-AZ構成です。
 
 ---
 
@@ -33,11 +35,11 @@ GitHub ActionsからOIDCでAWSへ認証し、Terraformによるインフラ構�
   - VPC
   - Subnet
   - Internet Gateway
-  - NAT Gateway
+  - Regional NAT Gateway
   - VPC Endpoint
   - ALB
   - EC2
-  - RDS
+  - RDS（MySQL / Multi-AZ）
   - S3
   - DynamoDB
   - IAM
@@ -57,7 +59,9 @@ GitHub ActionsからOIDCでAWSへ認証し、Terraformによるインフラ構�
 
 VPC、Public Subnet、Private Subnet、ALB、EC2、RDSなどをTerraformで構築しています。
 
-EC2は2つのAZのPrivate Subnetに1台ずつ配置し、ALBから2台へ振り分けることで、アプリケーション層の冗長性を高めています。
+EC2は2つのAZのPrivate Subnetに1台ずつ配置し、ALBから2台へ振り分けることで、アプリケーション層の冗長性を高めています。ただし、EC2は固定2台構成であり、ASGによる自動復旧・自動スケーリングは未実装です。
+
+RDSはMulti-AZ構成を採用し、データベース層で障害が発生した場合の自動フェイルオーバーに対応しています。
 
 EC2とRDSはPrivate Subnetに配置し、インターネットから直接アクセスできない構成としています。外部公開はALBのみです。
 
@@ -123,11 +127,11 @@ EC2をPrivate Subnetに配置したままSystems Managerを利用できるよう
 - `ec2messages`
 - `s3`
 
-Interface VPC EndpointではPrivate DNSを有効化し、通常のAWSサービスエンドポイント名を使用したまま、VPC Endpoint経由でSSM関連通信を行える構成にしています。
+Interface VPC EndpointではPrivate DNSを有効化し、通常のAWSサービスエンドポイント名を使用したまま、VPC Endpoint経由でSSM関連通信を行える構成にしています。S3にはGateway型VPC Endpointを使用しています。
 
-一方、Ansible実行時には外部リポジトリからパッケージを取得する必要があるため、インターネット向けOutbound通信にはNAT Gatewayを併用しています。
+一方、Ansible実行時には外部リポジトリからパッケージを取得する必要があるため、インターネット向けOutbound通信には**Regional NAT Gateway**を併用しています。
 
-現在のNAT Gatewayは1AZに1台の構成であり、EC2のアプリケーション層とは冗長化レベルが異なります。
+Regional NAT Gatewayは、特定の1つのAZに配置するZonal NAT Gatewayと異なり、リージョン単位で利用するNAT Gatewayです。
 
 ---
 
@@ -226,13 +230,14 @@ terraform apply
 ## 工夫した点
 
 - EC2をPrivate Subnetに配置し、SSHを使わずSSM経由で操作する構成にした
-- EC2を2つのAZに1台ずつ配置し、ALB配下のアプリケーション層をMulti-AZ化した
+- EC2を2つのAZに1台ずつ固定配置し、ALB配下のアプリケーション層を複数AZ構成にした
+- RDSをMulti-AZ構成とし、データベース層で自動フェイルオーバーできるようにした
 - EC2の複数台化に伴い、Target Group、CloudWatch Alarm、Output、GitHub Actions、Ansibleも複数台対応に修正した
 - GitHub ActionsのAWS認証にOIDCを使用し、長期アクセスキーを不要にした
 - tfstateをS3 + DynamoDBで管理し、ローカル環境に依存しないstate管理にした
 - Terraformコードをmodule化し、network / security / app / iamなどの責務を分けた
 - SSM Run CommandとAnsibleを組み合わせ、アプリケーションのデプロイを自動化した
-- VPC EndpointとNAT Gatewayの役割を整理し、Private Subnet上のEC2から必要な通信を行えるようにした
+- VPC EndpointとRegional NAT Gatewayの役割を分け、SSMのプライベート接続とPrivate EC2からのインターネット向け通信を使い分けた
 - 一度構築して終わりにせず、セキュリティ・可用性・運用面から継続的に構成を改善した
 
 ---
@@ -243,28 +248,29 @@ terraform apply
 
 特に、Private Subnet上のEC2へSSHせずにSSMで操作する構成や、GitHub Actions OIDCによるAWS認証、EC2の複数台化に伴う周辺リソースへの影響範囲の確認などを通して、単にリソースを作るだけではなく、構成全体の依存関係を考えることの重要性を学びました。
 
-また、Multi-AZについては、システム全体を一括でMulti-AZ化するのではなく、「どの層を複数AZに分散しているのか」「どこに単一障害点が残っているのか」を意識して設計する必要があると理解しました。
+また、Multi-AZについては、ALB・EC2・RDSそれぞれで冗長化の仕組みが異なる点を学びました。RDSは自動フェイルオーバーに対応していますが、ASGを導入していないEC2は、障害時に自動補充されないという違いがあります。
 
 ---
 
 ## 現在の冗長化状況
 
 ```text
-ALB         : 複数AZ
-EC2         : ap-northeast-1a / 1c に1台ずつ
-NAT Gateway : 1AZに1台
-RDS         : Single-AZ
+ALB         : 複数AZに対応
+EC2         : ap-northeast-1a / 1c に1台ずつ（固定2台、ASG未導入）
+RDS         : Multi-AZ（プライマリ／スタンバイ、自動フェイルオーバー）
+NAT Gateway : Regional NAT Gateway（リージョン単位、Private EC2のOutbound通信）
 ```
 
-そのため、現在はシステム全体を完全にMulti-AZ化しているわけではなく、ALBとEC2を中心としたアプリケーション層を複数AZ構成としています。
+EC2を複数AZに配置していても、ASGを導入していないため、EC2の停止や障害に応じて自動的に台数を維持する仕組みはありません。また、RDSのフェイルオーバー時には一時的な接続断が発生する可能性があります。
 
 ---
 
 ## 今後の改善点
 
-- RDS Multi-AZやNAT Gatewayの冗長化を含めた、システム全体の可用性設計の検討
+- Auto Scaling Group（ASG）導入によるEC2の自動補充・ヘルスチェック連携
+- Regional NAT Gatewayの利用状況・コストを評価し、必要に応じて構成を見直す
 - NAT Gatewayを使わずにデプロイできる構成の検証
 - Ansible実行に必要なパッケージをAMIに事前インストールする構成の検討
 - CloudWatch Logsやメトリクスを活用した監視・障害分析の強化
-- WAFルールのチューニング
+- WAF導入・ルール設計の検討
 - 本番環境を想定した複数環境構成の追加
